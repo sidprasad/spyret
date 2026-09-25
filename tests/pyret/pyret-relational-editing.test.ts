@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { IAtom, IRelation } from 'spytial-core/data';
-import { JSONDataInstance } from 'spytial-core/data';
+import type { IAtom, IRelation } from 'spytial-core';
+import { JSONDataInstance } from 'spytial-core';
 import { PyretDataInstance, type PyretObject } from '../../src/data-instance/pyret/pyret-data-instance';
 import { reifyToValue } from '../../src/data-instance/pyret/reify';
 import { replit } from '../../src/data-instance/pyret/replit';
 import { canon } from '../../src/data-instance/pyret/canon';
 import { fieldId } from '../../src/data-instance/pyret/identity';
-import { SGraphQueryEvaluator } from 'spytial-core-layout/evaluator';
+import { SGraphQueryEvaluator } from 'spytial-core/evaluator';
 
 const atom = (id: string, type: string, label = type): IAtom => ({ id, type, label });
 const relation = (id: string, name: string, types: string[], rows: string[][]): IRelation => ({

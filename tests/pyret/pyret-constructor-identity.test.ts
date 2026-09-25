@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { PyretDataInstance, type PyretObject } from '../../src/data-instance/pyret/pyret-data-instance';
-import { JSONDataInstance } from 'spytial-core/data';
+import { JSONDataInstance } from 'spytial-core';
 import { reifyToValue } from '../../src/data-instance/pyret/reify';
 import { replit } from '../../src/data-instance/pyret/replit';
 import { canon } from '../../src/data-instance/pyret/canon';
 import { readFieldId } from '../../src/data-instance/pyret/identity';
-import { SGraphQueryEvaluator } from 'spytial-core-layout/evaluator';
+import { SGraphQueryEvaluator } from 'spytial-core/evaluator';
 
 // Runtime-shaped values, not a substitute for the real-Pyret IDE experiment.
 const data = (name: string, fields: string[], values: unknown[], singleton = false): PyretObject => ({

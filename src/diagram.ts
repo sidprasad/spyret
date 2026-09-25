@@ -1,7 +1,13 @@
+import type { IDataInstance } from 'spytial-core';
 import { capturePyret, importPyretCapture } from './data-instance/pyret/capture';
 import { createPyretRuntimeAdapter } from './data-instance/pyret/runtime-adapter';
 import { replit } from './data-instance/pyret/replit';
 import { constructorDisplayName } from './data-instance/pyret/identity';
+
+/** Convert a value owned by this runtime into Core's IDataInstance contract. */
+export function toDataInstance(value: unknown, runtime: Parameters<typeof createPyretRuntimeAdapter>[0]): IDataInstance {
+  return importPyretCapture(capturePyret([{ name: 'value', value }], createPyretRuntimeAdapter(runtime))).instance;
+}
 
 /** The Pyret-specific part of diagramming. Rendering is supplied by the host. */
 export function prepareDiagram(value: unknown, runtime: Parameters<typeof createPyretRuntimeAdapter>[0]) {

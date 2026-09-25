@@ -1,14 +1,14 @@
 import { Graph } from 'graphlib';
-import { IDataInstance, IInputDataInstance, IAtom, IRelation, ITuple, IType } from 'spytial-core/data';
-import { DataInstanceEventEmitter } from 'spytial-core/data';
-import { settleTupleTypes } from 'spytial-core/data';
+import type { IDataInstance, IInputDataInstance, IAtom, IRelation, ITuple, IType } from 'spytial-core';
+import { DataInstanceEventEmitter } from '../data-instance-event-emitter';
+import { settleTupleTypes } from '../tuple-types';
 import { replit } from './replit';
 import { numberPayload, numberSource } from './numbers';
 import { isRuntimeNothing, isRuntimeReference, referenceInfo, isCallableField, objectFields, reifiedValueInfo, type PyretValueInfo } from './values';
 import { runtimeDictionaryInfo, dictionaryEntries } from './string-dict';
 import { isRuntimeTable, isRuntimeRow, tableContents } from './table';
 import { constructorInfo, constructorDisplayName, fieldId, readFieldId, readConstructorTypeId } from './identity';
-import { assertSameRelationName, relationSignature, tupleKey, uniqueTuples } from 'spytial-core/data';
+import { assertSameRelationName, relationSignature, tupleKey, uniqueTuples } from '../relation-identity';
 
 /**
  * Configuration options for primitive value idempotency in PyretDataInstance

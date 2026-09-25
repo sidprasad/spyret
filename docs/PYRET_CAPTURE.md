@@ -39,7 +39,7 @@ Call again to refresh after a mutation; there is no mutation observer.
 
 `importPyretCapture(snapshot)` checks the format/version, root and endpoint IDs,
 type memberships, duplicate records, and structural field/position/reference
-constraints. It returns a detached snapshot, a `JSONDataInstance`, and synthetic
+constraints. It returns a detached snapshot, a Spyret data instance implementing Core’s `IDataInstance`, and synthetic
 values. Synthetic values are **not executable Pyret values**: they have no
 methods, annotations, runtime brands, or closures. They are useful for inspecting
 structure without the producing runtime. Constructor identity is the synthetic
@@ -85,7 +85,7 @@ constructors in a fresh runtime requires a separate declaration-binding API.
 
 The datum remains the sole authority for value structure. Exact primitive labels,
 `element`, `entry`, `column`, `row`, `target`, mutable-field and nullary facts use
-the existing Core encoding. No second object tree is exported.
+the relational encoding inherited from Core. No second object tree is exported.
 
 Nominal constructor type IDs encode `pyret:constructor:v1:[scope,index,name]`.
 The scope is fresh for each capture. Existing field relation IDs retain their

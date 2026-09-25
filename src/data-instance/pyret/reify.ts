@@ -20,7 +20,7 @@
  * is `replit` in ./replit.ts.
  */
 
-import { IDataInstance, IAtom } from 'spytial-core/data';
+import type { IDataInstance, IAtom } from 'spytial-core';
 import { PyretObject, PyretDataInstance } from './pyret-data-instance';
 import { reifiedValueInfo, type PyretValueInfo } from './values';
 import { parseNumberLabel, reifyNumber, type ReifiedNumber } from './numbers';

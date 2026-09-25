@@ -1,18 +1,18 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import type { IAtom, IRelation } from 'spytial-core/data';
-import { JSONDataInstance } from 'spytial-core/data';
+import type { IAtom, IRelation } from 'spytial-core';
+import { JSONDataInstance } from 'spytial-core';
 import { PyretDataInstance, type PyretObject } from '../../src/data-instance/pyret/pyret-data-instance';
 import { reifyToValue } from '../../src/data-instance/pyret/reify';
 import { replit } from '../../src/data-instance/pyret/replit';
 import { tableContents } from '../../src/data-instance/pyret/table';
 import { canon } from '../../src/data-instance/pyret/canon';
 import { readFieldId } from '../../src/data-instance/pyret/identity';
-import { SGraphQueryEvaluator } from 'spytial-core-layout/evaluator';
-import { generateAlloySchema } from 'spytial-core/data';
-import { parseLayoutSpec } from 'spytial-core-layout';
-import { LayoutInstance } from 'spytial-core-layout';
+import { SGraphQueryEvaluator } from 'spytial-core/evaluator';
+import { generateAlloySchema } from 'spytial-core';
+import { parseLayoutSpec } from 'spytial-core';
+import { LayoutInstance } from 'spytial-core';
 
 const table = (headers: string[], rows: unknown[][]): PyretObject => ({
   brands: { '$brandtable123': true },

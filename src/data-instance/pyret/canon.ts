@@ -18,7 +18,7 @@
  */
 
 import { readFieldId } from './identity';
-import { IDataInstance } from 'spytial-core/data';
+import type { IDataInstance } from 'spytial-core';
 
 const PRIMITIVE_TYPES = new Set(['Number', 'String', 'Boolean', 'Index']);
 
