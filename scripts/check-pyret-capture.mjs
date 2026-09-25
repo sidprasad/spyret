@@ -5,7 +5,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { loadPyret } from './pyret-capture-runtime.mjs';
-import { capturePyret, createPyretRuntimeAdapter, importPyretCapture, readConstructorTypeId, PyretCaptureError } from '../dist/spyret.mjs';
+import { capturePyret, createPyretRuntimeAdapter, importPyretCapture, readConstructorTypeId, PyretCaptureError, toDataInstance } from '../dist/spyret.mjs';
 
 const root = path.resolve(process.argv[2] || '');
 if (!process.argv[2]) throw new Error('Supply a built Pyret language checkout');
@@ -50,6 +50,14 @@ const roots = [
   ['list-set', await makeSet('list-set', [1, 2])], ['tree-set', await makeSet('tree-set', [1, 2])],
   ['string', 'é\n"\\\0'], ['boolean', false],
 ].map(([name, value]) => ({ name, value, observation: { label: name } }));
+
+// Exercise the public one-step handoff with values from the actual upstream runtime.
+for (const { value } of roots) {
+  const instance = toDataInstance(value, rt);
+  assert.ok(instance.getAtoms().length > 0);
+  assert.equal(instance.generateGraph().nodeCount(), instance.getAtoms().length);
+  for (const atom of instance.getAtoms()) assert.equal(instance.getAtomType(atom.id).id, atom.type);
+}
 
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const runtimeSha256 = createHash('sha256').update(fs.readFileSync(path.join(root, 'build/phaseA/js/runtime.js'))).digest('hex');

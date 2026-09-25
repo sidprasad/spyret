@@ -6,7 +6,7 @@ import type { PyretRuntimeAdapter } from '../../src/pyret-capture';
 import { numberPayload } from '../../src/data-instance/pyret/numbers';
 import { readConstructorTypeId } from '../../src/data-instance/pyret/identity';
 import { PyretDataInstance } from '../../src/data-instance/pyret/pyret-data-instance';
-import { SGraphQueryEvaluator } from 'spytial-core-layout/evaluator';
+import { SGraphQueryEvaluator } from 'spytial-core/evaluator';
 
 // Adapter contract tests use independent host values. Real runtime predicates,
 // numeric representations and library storage are checked by the integration script.

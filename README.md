@@ -10,25 +10,31 @@ identity, exact numbers, collections, capture validation, reconstruction and the
 tests of those contracts.
 
 ```js
-import { capturePyret, createPyretRuntimeAdapter, importPyretCapture } from 'spyret';
+import { toDataInstance } from 'spyret';
 
-const snapshot = capturePyret([
-  { name: 'tree', value: tree },
-], createPyretRuntimeAdapter(runtime));
-
-// This receiver needs neither the original runtime nor an IDE.
-const { instance, values } = importPyretCapture(JSON.parse(JSON.stringify(snapshot)));
-// instance implements Spytial's IDataInstance; values contains structural values.
+const instance = toDataInstance(pyretValue, runtime);
+// Pass instance directly to Spytial-Core's evaluator/layout APIs.
 ```
+
+`toDataInstance` accepts a value and the standard Pyret runtime that owns it.
+Spyret handles capture, relationalization and validation and returns an
+`IDataInstance`. Core handles queries, layout and rendering. No
+`spytial-core/data` entry point or Core runtime is needed inside Spyret.
+
+For transport between processes, use `capturePyret` with
+`createPyretRuntimeAdapter(runtime)`, then `importPyretCapture` at the receiver.
+The receiver needs neither Pyret nor an IDE. Collecting layout YAML alongside
+values can be added to Spyret later; YAML interpretation stays in Core.
 
 See [the capture contract](docs/PYRET_CAPTURE.md) for supported values and limits.
 Closures are not serialized. Source preview is separate from structural capture.
 
 ## Development
 
-Requires Node 22 or later. Core's unreleased headless data entry is pinned to a
-reviewed source commit in the lockfile; its Git dependency builds that entry
-during installation. Tests also use the released Core layout/evaluator package.
+Requires Node 22 or later. The development dependency on released Core 6.3.1
+provides its public interface types and tests layout/query compatibility.
+Published Spyret builds include those type declarations and have no Core runtime
+dependency.
 
 ```sh
 npm ci
@@ -56,6 +62,14 @@ Pyret check blocks compare inspection strings. No browser or IDE is involved.
 
 CommonJS and ES modules import `spyret`. The browser bundle is
 `dist/spyret.global.js`, which defines `Spyret`.
+
+## npm releases
+
+Published builds contain Spyret's adapter and bundled interface declarations.
+Hosts can use Core 6.3.1 for layout and rendering; Core 6.3.2 is not required.
+`npm run test:package` verifies the actual tarball in an isolated consumer.
+Version tags trigger the unit/package suite and both upstream PBT seeds before
+publishing. See [release setup and commands](docs/RELEASING.md).
 
 ## Migration and provenance
 

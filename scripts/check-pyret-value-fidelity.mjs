@@ -3,12 +3,12 @@
  *   node --import tsx scripts/check-pyret-value-fidelity.mjs /path/to/pyret-lang
  *
  * Real runtime values -> working PyretDataInstance -> JSON -> default
- * JSONDataInstance -> cache-free core reifier -> separately compiled Pyret
+ * CapturedDataInstance -> cache-free Spyret reifier -> separately compiled Pyret
  * checks of exact torepr equality and reference topology. Declarations are supplied only after
  * reification. This supplements the IDE's expression-driven acceptance harness;
  * it does not require an IDE adapter or replace that harness.
  * Outputs and compiler caches go to a temporary directory; the Pyret checkout
- * and its source are not changed. No runtime or compiler is bundled into core.
+ * and its source are not changed. No runtime or compiler is bundled into Spyret.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,7 @@ import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { PyretDataInstance } from '../src/data-instance/pyret/pyret-data-instance.ts';
-import { JSONDataInstance } from 'spytial-core/data';
+import { CapturedDataInstance } from '../src/data-instance/captured-data-instance.ts';
 import { replit } from '../src/data-instance/pyret/replit.ts';
 import { readFieldId } from '../src/data-instance/pyret/identity.ts';
 
@@ -417,7 +417,7 @@ async function main() {
     });
     datum.atoms.reverse(); datum.relations.reverse();
     PyretDataInstance.clearGlobalConstructorCache();
-    const R = replit(new JSONDataInstance(datum), rootId);
+    const R = replit(new CapturedDataInstance(datum), rootId);
     tokenizer.Tokenizer.tokenizeFrom(R);
     if (!parser.PyretGrammar.parse(tokenizer.Tokenizer))
       throw new Error('Invalid generated Pyret: ' + R);

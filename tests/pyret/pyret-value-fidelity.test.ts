@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { PyretDataInstance, type PyretObject } from '../../src/data-instance/pyret/pyret-data-instance';
-import { JSONDataInstance } from 'spytial-core/data';
+import { JSONDataInstance } from 'spytial-core';
 import { reifyToValue } from '../../src/data-instance/pyret/reify';
 import { replit } from '../../src/data-instance/pyret/replit';
 import { canon } from '../../src/data-instance/pyret/canon';
 import { readFieldId } from '../../src/data-instance/pyret/identity';
-import { SGraphQueryEvaluator } from 'spytial-core-layout/evaluator';
-import { generateAlloySchema } from 'spytial-core/data';
+import { SGraphQueryEvaluator } from 'spytial-core/evaluator';
+import { generateAlloySchema } from 'spytial-core';
 
 const object = (dict: Record<string, unknown> = {}): PyretObject => ({ dict });
 const box = (v: unknown): PyretObject => ({ $name: 'box', $arity: 1, $constructor: { $fieldNames: ['v'] }, dict: { v } });

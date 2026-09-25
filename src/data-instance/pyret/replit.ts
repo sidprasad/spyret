@@ -27,7 +27,7 @@
 
 import { reifiedValueInfo } from './values';
 import { numberPayload, numberSource } from './numbers';
-import { IDataInstance } from 'spytial-core/data';
+import type { IDataInstance } from 'spytial-core';
 import { PyretObject } from './pyret-data-instance';
 import { reifyToValue, ReifiedValue } from './reify';
 import { referenceSource } from './reference-source';

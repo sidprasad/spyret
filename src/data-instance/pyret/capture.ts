@@ -1,6 +1,6 @@
 import { PyretDataInstance } from './pyret-data-instance';
-import { JSONDataInstance } from 'spytial-core/data';
-import type { IAtom, IRelation, IType } from 'spytial-core/data';
+import { CapturedDataInstance } from '../captured-data-instance';
+import type { IAtom, IRelation, IType } from 'spytial-core';
 import { constructorTypeId, readConstructorTypeId } from './identity';
 import { reifyToValues, type ReifiedValue } from './reify';
 import type { PyretObservation, PyretRuntimeAdapter } from './runtime-adapter';
@@ -127,7 +127,7 @@ export function capturePyret(roots: readonly PyretCaptureRoot[], adapter: PyretR
 }
 
 /** Import with no runtime, producer caches, browser or evaluator. Never repair invalid capture data. */
-export function importPyretCapture(input: unknown): { snapshot: PyretCaptureSnapshot; instance: JSONDataInstance; values: ReadonlyMap<string, ReifiedValue> } {
+export function importPyretCapture(input: unknown): { snapshot: PyretCaptureSnapshot; instance: CapturedDataInstance; values: ReadonlyMap<string, ReifiedValue> } {
   const s = jsonCopy(input) as PyretCaptureSnapshot;
   if (!s || s.format !== 'spytial-pyret-capture' || s.version !== 1) throw new Error('Unsupported Pyret capture format/version');
   if (!Array.isArray(s.roots) || !s.roots.length || !s.datum || !Array.isArray(s.datum.atoms)
@@ -161,7 +161,7 @@ export function importPyretCapture(input: unknown): { snapshot: PyretCaptureSnap
       || s.datum.types.some(t => t.types.some(id => !typeIds.has(id)))) throw new Error('Unknown Pyret capture type');
   for (const r of s.datum.relations) {
     if (!r || typeof r.id !== 'string' || relationIds.has(r.id) || typeof r.name !== 'string' || !Array.isArray(r.tuples)
-        || !Array.isArray(r.types)) throw new Error('Malformed or duplicate Pyret capture relation');
+        || !Array.isArray(r.types) || r.types.some(type => typeof type !== 'string')) throw new Error('Malformed or duplicate Pyret capture relation');
     relationIds.add(r.id);
     const tupleIds = new Set<string>();
     for (const t of r.tuples) {
@@ -179,8 +179,7 @@ export function importPyretCapture(input: unknown): { snapshot: PyretCaptureSnap
         || !atoms.has(root.atomId) || atoms.get(root.atomId)!.type === 'Index') throw new Error('Invalid Pyret capture root');
     names.add(root.name);
   }
-  const instance = new JSONDataInstance(s.datum);
-  if (instance.getErrors().length) throw new Error(instance.getErrors().join('; '));
+  const instance = new CapturedDataInstance(s.datum);
   // Validate the structural encoding, including fields, targets, and dense
   // positions. Structural cycles are valid even when source emission is not.
   const ids = [...atoms.values()].filter(a => a.type !== 'Index').map(a => a.id);
