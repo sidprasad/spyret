@@ -45,7 +45,10 @@ jobs:
           node-version: 22.22.2
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - run: npm install --global npm@11.20.0
+      - name: Install publishing tools without replacing the running npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/spyret-publish-tools" --no-audit --no-fund --ignore-scripts npm@11.20.0
+          echo "$RUNNER_TEMP/spyret-publish-tools/node_modules/.bin" >> "$GITHUB_PATH"
       - run: npm ci
       - name: Pack and test the exact release artifact
         run: npm run test:package -- --out release

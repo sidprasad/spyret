@@ -12,12 +12,11 @@ merged release commit, run:
 
 ```sh
 npm login
-npm install --global npm@11.20.0
 npm ci
 npm run typecheck
 npm test
-npm run test:package -- --out release
-npm publish ./release/spyret-0.1.0.tgz --access public
+npx --yes --package npm@11.20.0 -c 'npm run test:package -- --out release'
+npx --yes --package npm@11.20.0 npm publish ./release/spyret-0.1.0.tgz --access public
 ```
 
 Also require green upstream PBT CI for this commit before publishing. The package
@@ -51,8 +50,8 @@ No npm token needs to be stored in GitHub. Publishing uses OIDC and provenance.
 2. On the updated `main`, tag that exact commit and push the tag:
 
    ```sh
-   git tag v0.1.1
-   git push origin v0.1.1
+   git tag v0.1.2
+   git push origin v0.1.2
    ```
 
 3. `release.yml` verifies the tag matches `package.json` and belongs to `main`,
@@ -64,6 +63,6 @@ workflow can be rerun or manually dispatched against the same **tag**. An existi
 npm version is accepted only when its integrity matches the tested tarball;
 different contents require a version bump.
 
-For the manually bootstrapped 0.1.0 release, push `v0.1.0` after configuring
-trusted publishing. The workflow verifies that identical package and creates
-the corresponding GitHub release.
+Version 0.1.0 was bootstrapped manually. Subsequent versions use the tagged
+workflow. It installs its pinned npm into a separate tools directory so npm
+does not replace itself while running.
