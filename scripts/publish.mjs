@@ -9,7 +9,7 @@ assert.equal(process.env.GITHUB_REF_TYPE, 'tag');
 assert.equal(process.env.GITHUB_REF_NAME, `v${pkg.version}`);
 const tarballs = fs.readdirSync('release').filter(f => f.endsWith('.tgz'));
 assert.equal(tarballs.length, 1, 'Expected exactly one tested release artifact');
-const tarball = path.join('release', tarballs[0]);
+const tarball = path.resolve('release', tarballs[0]);
 const integrity = 'sha512-' + createHash('sha512').update(fs.readFileSync(tarball)).digest('base64');
 const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg.name)}/${pkg.version}`);
 if (response.ok) {

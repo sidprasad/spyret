@@ -17,7 +17,7 @@ npm ci
 npm run typecheck
 npm test
 npm run test:package -- --out release
-npm publish release/spyret-0.1.0.tgz --access public
+npm publish ./release/spyret-0.1.0.tgz --access public
 ```
 
 Also require green upstream PBT CI for this commit before publishing. The package
