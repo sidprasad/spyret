@@ -1,0 +1,56 @@
+name: Spyret
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.22.2
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck && npm run build && npm test
+  upstream:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1, 2]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: spyret
+      - uses: actions/checkout@v5
+        with:
+          repository: brownplt/pyret-lang
+          ref: 6e62dcda5298606aa0abe66a372c4eb17a38db85
+          path: pyret
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.22.2
+      - run: npm ci && npm run build
+        working-directory: spyret
+      - run: npm ci --ignore-scripts && make phaseA
+        working-directory: pyret/lang
+      - run: |
+          mkdir -p reports
+          npm run test:upstream -- ../pyret/lang reports/runtime.json
+          npm run test:program -- ../pyret/lang reports/program.json
+          npm run test:pbt -- ../pyret/lang reports/pbt.json
+        working-directory: spyret
+        env:
+          REIFY_SEED: ${{ matrix.seed }}
+          REIFY_FUZZ_RUNS: 100
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pyret-seed-${{ matrix.seed }}
+          path: spyret/reports
