@@ -1,0 +1,60 @@
+{
+  "name": "spyret",
+  "version": "0.1.0",
+  "description": "Headless interfaces between standard Pyret and Spytial",
+  "license": "MIT",
+  "author": "Siddhartha Prasad",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidprasad/spyret.git"
+  },
+  "main": "./dist/spyret.js",
+  "module": "./dist/spyret.mjs",
+  "types": "./dist/spyret.d.ts",
+  "files": [
+    "dist",
+    "docs"
+  ],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/spyret.d.mts",
+        "default": "./dist/spyret.mjs"
+      },
+      "require": {
+        "types": "./dist/spyret.d.ts",
+        "default": "./dist/spyret.js"
+      }
+    },
+    "./global": "./dist/spyret.global.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:upstream": "node scripts/check-pyret-capture.mjs",
+    "test:program": "node scripts/check-pyret-capture-program.mjs",
+    "test:pbt": "node scripts/check-pyret-pbt.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "graphlib": "^2.1.8"
+  },
+  "peerDependencies": {
+    "spytial-core": ">=6.3.2"
+  },
+  "devDependencies": {
+    "@types/graphlib": "^2.1.12",
+    "@types/node": "^24.0.3",
+    "fast-check": "^4.6.0",
+    "jsdom": "^26.1.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "spytial-core": "git+https://github.com/sidprasad/spytial-core.git#294b69ed209cc4b81c0bccdb4c7b8663f776ac4b",
+    "spytial-core-layout": "npm:spytial-core@6.3.1"
+  }
+}
