@@ -45,7 +45,7 @@ jobs:
           node-version: 22.22.2
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - run: npm install --global npm@11
+      - run: npm install --global npm@11.20.0
       - run: npm ci
       - name: Pack and test the exact release artifact
         run: npm run test:package -- --out release

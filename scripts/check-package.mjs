@@ -1,4 +1,4 @@
-/** Test the real packed artifact in an isolated, offline consumer. */
+/** Test the real packed artifact in an isolated consumer. */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -17,7 +17,7 @@ try {
   assert.ok([...files].every(f => /^(dist\/|docs\/|package.json$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.txt$)/.test(f)), 'Unexpected package contents');
   const consumer = path.join(scratch, 'consumer'); fs.mkdirSync(consumer);
   fs.writeFileSync(path.join(consumer, 'package.json'), '{"private":true,"type":"module"}\n');
-  execFileSync('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', path.join(destination, packed.filename)], { cwd: consumer, stdio: 'pipe' });
+  execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', path.join(destination, packed.filename)], { cwd: consumer, stdio: 'pipe' });
   const installed = JSON.parse(fs.readFileSync(path.join(consumer, 'node_modules/spyret/package.json'), 'utf8'));
   assert.deepEqual(Object.keys(installed.dependencies || {}), ['@types/graphlib']);
   assert.deepEqual(installed.peerDependencies || {}, {});

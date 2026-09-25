@@ -1,4 +1,4 @@
-import type { IDataInstance, IRelation, ITuple } from 'spytial-core';
+import type { IRelation, ITuple } from 'spytial-core';
 
 /** Tuple identity is its ordered atom IDs, not its inferred type signature. */
 export function tupleKey(tuple: ITuple): string {
@@ -25,35 +25,6 @@ export function relationSignature(tuples: readonly ITuple[], empty: string[] = [
     const types = new Set(tuples.map(t => t.types[i] ?? 'univ'));
     return types.size === 1 ? [...types][0] : 'univ';
   });
-}
-
-/**
- * Query projection only: all records named foo denote the set union foo.
- * Never use this projection as the stored datum or as input to a reifier.
- */
-export function relationsByName(relations: readonly IRelation[]): IRelation[] {
-  const groups = new Map<string, IRelation[]>();
-  for (const relation of relations) {
-    const group = groups.get(relation.name) ?? [];
-    group.push(relation);
-    groups.set(relation.name, group);
-  }
-  return [...groups].map(([name, records]) => {
-    const allTuples = records.flatMap(r => r.tuples);
-    const tuples = uniqueTuples(allTuples);
-    return { id: name, name, tuples, types: relationSignature(allTuples, records[0].types) };
-  });
-}
-
-/** Read-only evaluator boundary: keep the original data instance untouched. */
-export function nameBasedView(instance: IDataInstance): IDataInstance {
-  return {
-    getAtoms: () => instance.getAtoms(),
-    getTypes: () => instance.getTypes(),
-    getAtomType: id => instance.getAtomType(id),
-    getRelations: () => relationsByName(instance.getRelations()),
-    generateGraph: (a, b) => instance.generateGraph(a, b),
-  };
 }
 
 /** One ID must never silently acquire another relation's name. */

@@ -1,9 +1,7 @@
 import type { DataInstanceEvent, DataInstanceEventType, DataInstanceEventListener } from 'spytial-core';
 
 /**
- * Shared event plumbing for the mutable data instances (JSON, Alloy, Pyret,
- * DOT). Each adapter used to carry its own copy of this listener map and the
- * three methods around it; they all extend this class instead.
+ * Event plumbing for Spyret's mutable Pyret data instance.
  *
  * `emitEvent` is protected: only the instance itself decides when a change
  * happened. A listener that throws is logged and skipped so one bad listener

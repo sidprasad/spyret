@@ -12,6 +12,7 @@ merged release commit, run:
 
 ```sh
 npm login
+npm install --global npm@11.20.0
 npm ci
 npm run typecheck
 npm test
@@ -20,7 +21,7 @@ npm publish release/spyret-0.1.0.tgz --access public
 ```
 
 Also require green upstream PBT CI for this commit before publishing. The package
-check installs the actual tarball offline into an empty project and exercises
+check installs the actual tarball into an empty project and exercises
 CJS, ESM, browser and TypeScript consumers.
 
 After the package exists, configure its npm **Trusted Publisher** settings:
