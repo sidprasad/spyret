@@ -43,7 +43,7 @@ it('downloads matching native and rules, then generates the wrapper and single C
   expect(fs.readdirSync(path.dirname(release.nativePath))).toEqual(['spyret-v1.2.3.js']);
   expect(fs.readFileSync(release.nativePath, 'utf8')).toBe(setup.native);
   expect(fs.readFileSync(release.rulesPath, 'utf8')).toBe(setup.rules);
-  prepareWrapper(release, 'https://drive.google.com/file/d/native_123/view?usp=sharing');
+  prepareWrapper(release, 'https://code.pyret.org/editor#program=native_123');
   expect(fs.readdirSync(path.dirname(release.nativePath))).toEqual(['spyret-v1.2.3.arr', 'spyret-v1.2.3.js']);
   const wrapper = fs.readFileSync(release.wrapperPath, 'utf8');
   expect(wrapper).toContain('# Rules from this exact release');
@@ -83,6 +83,22 @@ it('accepts Drive file links and IDs but rejects folders and unrelated links', (
   expect(driveFileId(' native_123-abc ')).toBe('native_123-abc');
   expect(driveFileId('https://drive.google.com/open?id=native_123')).toBe('native_123');
   for (const input of ['', 'https://example.com/file/d/file1/view', 'https://drive.google.com/drive/folders/folder1', 'bad"id']) {
-    expect(() => driveFileId(input)).toThrow('Drive file link or file ID');
+    expect(() => driveFileId(input)).toThrow('Google Drive file link');
+  }
+});
+
+it('accepts saved CPO editor URLs without mistaking share links or other origins for authorization', () => {
+  expect(driveFileId('https://code.pyret.org/editor#program=native_123-abc')).toBe('native_123-abc');
+  expect(driveFileId('https://code.pyret.org/editor#program=native_123&other=value')).toBe('native_123');
+  for (const input of [
+    'https://code.pyret.org/editor',
+    'https://code.pyret.org/editor#share=native_123',
+    'https://code.pyret.org/editor#program=',
+    'https://code.pyret.org/editor#program=bad%22id',
+    'https://code.pyret.org/other#program=native_123',
+    'https://example.com/editor#program=native_123',
+    'https://code.pyret.org.example.com/editor#program=native_123',
+  ]) {
+    expect(() => driveFileId(input)).toThrow('saved CPO editor link');
   }
 });

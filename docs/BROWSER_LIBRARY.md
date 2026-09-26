@@ -8,7 +8,10 @@ integration is a separate `spyret/browser` entry.
 ## Import a published version in CPO
 
 A maintainer runs `npm run release:drive` and follows the
-[manual upload instructions](RELEASING.md). Use the import line they supply:
+[CPO-save and Drive publishing instructions](RELEASING.md). The native JavaScript
+requires CPO per-file authorization; public sharing alone is insufficient.
+Verify the import with a second account using normal login before distributing it.
+Use the import line the maintainer supplies:
 
 ```pyret
 import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
@@ -22,9 +25,11 @@ only one import for typed constructors and diagram functions.
 
 ## An ordinary native import in CPO
 
-CPO already supports native Pyret modules through `gdrive-js`. Upload the built
-`dist/spyret.pyret.js` to Google Drive **as `spyret.js`**, and grant intended users
-read access. Do not convert it to a Google document. With that file's ID:
+CPO supports native Pyret modules through `gdrive-js`. Save the complete contents
+of `dist/spyret.pyret.js` through a new CPO editor document **as `spyret.js`**,
+without running it, following [the release workflow](RELEASING.md). Grant intended
+users read access in Drive; their CPO per-file authorization must also be checked.
+Do not convert the file to a Google document. With the saved file's ID:
 
 ```pyret
 import gdrive-js("spyret.js", "YOUR_DRIVE_FILE_ID") as Spyret

@@ -37,8 +37,10 @@ runtime requirements. For portable snapshots and reconstruction, see the
 ## Pyret: import, describe, display
 
 A maintainer runs `npm run release:drive` and follows the
-[manual upload instructions](docs/RELEASING.md). Users then import the versioned
-wrapper in CPO to get typed rule constructors and diagram functions together:
+[CPO-save and Drive publishing instructions](docs/RELEASING.md). The native
+JavaScript file needs CPO per-file authorization; a public Drive upload alone
+is insufficient. Verify access with a second account before distributing the
+versioned wrapper, which combines typed rule constructors and diagram functions:
 
 ```pyret
 # Use the import line supplied by the library maintainer.
