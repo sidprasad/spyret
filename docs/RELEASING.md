@@ -117,6 +117,8 @@ workflow; publish a new tag after merging these changes.
 No service account or shared drive is needed for this route. Download the exact
 `spyret-vVERSION.js` and `spyret-VERSION.tgz` assets from the GitHub release
 into a local `release/` directory.
+The existing `v0.1.1` release is headless and has no native Pyret module;
+this route starts with a release that includes `spyret-vVERSION.js`.
 Upload the JavaScript file to your own Google Drive **without conversion**, keep
 its exact filename, and set General access to **Anyone with the link / Viewer**.
 Copy the native file ID from its Drive URL. This user account is the principal
