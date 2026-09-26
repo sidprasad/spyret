@@ -13,7 +13,7 @@ fs.mkdirSync(destination, { recursive: true });
 try {
   const [packed] = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', destination], { encoding: 'utf8' }));
   const files = new Set(packed.files.map(f => f.path));
-  for (const file of ['dist/spyret.js', 'dist/spyret.mjs', 'dist/spyret.global.js', 'dist/spyret.d.ts', 'dist/spyret.d.mts', 'pyret/spytial.arr', 'LICENSE', 'THIRD_PARTY_NOTICES.txt']) assert.ok(files.has(file), `Missing ${file}`);
+  for (const file of ['dist/spyret.js', 'dist/spyret.mjs', 'dist/spyret.global.js', 'dist/spyret.d.ts', 'dist/spyret.d.mts', 'dist/spyret-browser.js', 'dist/spyret-browser.mjs', 'dist/spyret-browser.d.ts', 'dist/spyret-browser.d.mts', 'dist/spyret-browser.amd.js', 'dist/spyret.pyret.js', 'pyret/spytial.arr', 'LICENSE', 'THIRD_PARTY_NOTICES.txt']) assert.ok(files.has(file), `Missing ${file}`);
   assert.ok([...files].every(f => /^(dist\/|docs\/|pyret\/|package.json$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.txt$)/.test(f)), 'Unexpected package contents');
   const consumer = path.join(scratch, 'consumer'); fs.mkdirSync(consumer);
   fs.writeFileSync(path.join(consumer, 'package.json'), '{"private":true,"type":"module"}\n');
@@ -28,8 +28,15 @@ try {
     import vm from 'node:vm';
     import { createRequire } from 'node:module';
     import * as esm from 'spyret';
+    import * as browser from 'spyret/browser';
     const require = createRequire(import.meta.url);
     const cjs = require('spyret');
+    assert.equal(typeof browser.createPyretModule, 'function');
+    assert.equal(typeof require('spyret/browser').createPyretModule, 'function');
+    const native = vm.runInNewContext(fs.readFileSync(require.resolve('spyret/pyret-module'), 'utf8'));
+    assert.equal(native.nativeRequires.length, 0);
+    assert.equal(native.provides.values.diagram, 'Any');
+    assert.ok(!('show' in native.provides.values));
     assert.match(fs.readFileSync(require.resolve('spyret/spytial.arr'), 'utf8'), /data SpytialRule:/);
     const realm = vm.createContext({});
     vm.runInContext(fs.readFileSync(require.resolve('spyret/global'), 'utf8'), realm);
@@ -67,7 +74,7 @@ try {
     const specs: Promise<string[]> = spyret.getSpytialSpec(42, runtime);
     const yaml: string = spyret.spytialRulesToYaml(null, runtime);
   `;
-  fs.writeFileSync(path.join(consumer, 'types.mts'), "import * as spyret from 'spyret';\n" + useTypes);
+  fs.writeFileSync(path.join(consumer, 'types.mts'), "import * as spyret from 'spyret';\nimport { combineSpytialSpecs, type BrowserHost } from 'spyret/browser';\nconst spec: string = combineSpytialSpecs([]);\n" + useTypes);
   fs.writeFileSync(path.join(consumer, 'types.cts'), "import spyret = require('spyret');\n" + useTypes);
   execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--noEmit', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--typeRoots', path.join(consumer, 'node_modules/@types'), 'types.mts', 'types.cts'], { cwd: consumer, stdio: 'inherit' });
   console.log(`Packed declarations compile using only declared dependencies: ${packed.filename}`);

@@ -177,9 +177,8 @@ function formatPath(path?: ValuePath): string {
  * Collect one YAML document per distinct _spytial function/method, in breadth-
  * first order. Methods bind to the first encountered owner; hooks must describe
  * types, not individual instances. Discovery finishes before user code runs.
- * Call from the JS host while the owning runtime is idle (or paused).
  */
-export async function getSpytialSpec(value: unknown, runtime: SpytialRuntime): Promise<string[]> {
+function spytialComputation(value: unknown, runtime: SpytialRuntime, onError?: (error: SpytialSpecError) => never) {
   const adapter = createPyretRuntimeAdapter(runtime);
   const seen = new Set<unknown>();
   const hooks = new Set<unknown>();
@@ -217,7 +216,6 @@ export async function getSpytialSpec(value: unknown, runtime: SpytialRuntime): P
       throw new SpytialSpecError(formatPath(path), error instanceof Error ? error.message : String(error));
     }
   }
-  if (!calls.length) return [];
   const documents: string[] = [];
   let index = 0;
   let activePath = 'value';
@@ -228,14 +226,33 @@ export async function getSpytialSpec(value: unknown, runtime: SpytialRuntime): P
     activePath = `${formatPath(call.path)}._spytial`;
     return runtime.safeCall(() => call.fn.app(), result => {
       // A raw YAML string remains an escape hatch for existing hooks.
-      documents.push(typeof result === 'string' ? result : spytialRulesToYaml(result, runtime));
+      try { documents.push(typeof result === 'string' ? result : spytialRulesToYaml(result, runtime)); }
+      catch (error) {
+        const failure = new SpytialSpecError(activePath, error instanceof Error ? error.message : String(error));
+        if (onError) onError(failure);
+        throw failure;
+      }
       return next();
     }, activePath);
   };
+  return { next, documents, hasHooks: calls.length > 0, activePath: () => activePath };
+}
+
+/** Internal native-module entry: keep hook execution on the caller's stack. */
+export function collectSpytialSpecOnStack(value: unknown, runtime: SpytialRuntime, after: (documents: string[]) => unknown,
+  onError?: (error: SpytialSpecError) => never): unknown {
+  const computation = spytialComputation(value, runtime, onError);
+  return runtime.safeCall(computation.next, () => after(computation.documents), 'Spyret.collectSpytialSpec');
+}
+
+/** Collect from JavaScript while the runtime is idle or paused. */
+export async function getSpytialSpec(value: unknown, runtime: SpytialRuntime): Promise<string[]> {
+  const computation = spytialComputation(value, runtime);
+  if (!computation.hasHooks) return [];
   return new Promise((resolve, reject) => {
-    runtime.runThunk(next, result => {
-      if (runtime.isSuccessResult(result)) resolve(documents);
-      else reject(new SpytialSpecError(activePath, result.exn instanceof Error ? result.exn.message : String(result.exn)));
+    runtime.runThunk(computation.next, result => {
+      if (runtime.isSuccessResult(result)) resolve(computation.documents);
+      else reject(new SpytialSpecError(computation.activePath(), result.exn instanceof Error ? result.exn.message : String(result.exn)));
     });
   });
 }

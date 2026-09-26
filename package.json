@@ -1,6 +1,6 @@
 {
   "name": "spyret",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Headless interfaces between standard Pyret and Spytial",
   "license": "MIT",
   "author": "Siddhartha Prasad",
@@ -29,10 +29,22 @@
       }
     },
     "./global": "./dist/spyret.global.js",
-    "./spytial.arr": "./pyret/spytial.arr"
+    "./spytial.arr": "./pyret/spytial.arr",
+    "./browser": {
+      "import": {
+        "types": "./dist/spyret-browser.d.mts",
+        "default": "./dist/spyret-browser.mjs"
+      },
+      "require": {
+        "types": "./dist/spyret-browser.d.ts",
+        "default": "./dist/spyret-browser.js"
+      }
+    },
+    "./browser/amd": "./dist/spyret-browser.amd.js",
+    "./pyret-module": "./dist/spyret.pyret.js"
   },
   "scripts": {
-    "build": "npm run check:spytial && tsup && node scripts/write-notices.mjs",
+    "build": "npm run check:spytial && tsup && node scripts/write-pyret-module.mjs && node scripts/write-notices.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:upstream": "node scripts/check-pyret-capture.mjs",
@@ -42,21 +54,24 @@
     "test:package": "npm run build && node scripts/check-package.mjs",
     "generate:spytial": "node scripts/generate-spytial.mjs",
     "check:spytial": "node scripts/generate-spytial.mjs --check",
-    "test:spytial": "node scripts/check-spytial-program.mjs"
+    "test:spytial": "node scripts/check-spytial-program.mjs",
+    "make:drive-wrapper": "node scripts/make-drive-wrapper.mjs"
   },
   "engines": {
     "node": ">=22"
   },
   "devDependencies": {
+    "@types/js-yaml": "4.0.9",
     "@types/node": "^24.0.3",
     "fast-check": "^4.6.0",
+    "graphlib": "^2.1.8",
+    "js-yaml": "4.1.0",
     "jsdom": "^26.1.0",
+    "spytial-core": "6.3.2",
     "tsup": "^8.5.0",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4",
-    "spytial-core": "6.3.1",
-    "graphlib": "^2.1.8"
+    "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public",

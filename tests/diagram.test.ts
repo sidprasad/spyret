@@ -27,7 +27,7 @@ const runtime: PyretCaptureRuntime = {
   isOpaque: () => false, isObject: () => false,
 };
 
-it('hands a Spyret IDataInstance directly to Core 6.3.1 for queries and layout', () => {
+it('hands a Spyret IDataInstance directly to Core 6.3.2 for queries and layout', () => {
   const instance: IDataInstance = toDataInstance(['PVD', 'ORD'], runtime);
   expect(isDataInstance(instance)).toBe(true);
   const evaluator = new SGraphQueryEvaluator();

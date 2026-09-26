@@ -1,110 +1,89 @@
 # Spyret
 
-The interfaces between standard Pyret and Spytial. Spyret captures Pyret values
-as portable relational data, reconstructs their structure, and emits Pyret source
-where supported. It runs in Node or a browser without an IDE.
+[![Build and tests](https://github.com/sidprasad/spyret/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/sidprasad/spyret/actions/workflows/test.yml)
+[![npm version](https://img.shields.io/npm/v/spyret)](https://www.npmjs.com/package/spyret)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-`spyret-ide` is one consumer. `spytial-core` owns generic graph data, queries,
-layout and rendering. This package owns Pyret runtime adaptation, constructor
-identity, exact numbers, collections, capture validation, reconstruction and the
-tests of those contracts.
+Spyret connects [Pyret](https://pyret.org/) values to
+[Spytial](https://github.com/sidprasad/spytial-core) diagrams.
+`toDataInstance(value, runtime)` turns a Pyret value into relational data for
+Spytial; `await getSpytialSpec(value, runtime)` walks its reachable values and
+collects one YAML string per distinct `_spytial` hook. Hooks can return typed
+Pyret rules or raw YAML; values without hooks return `[]`. The JavaScript API
+runs without an IDE, and the browser library lets Pyret programs display diagrams
+in CPO through an import.
 
-```js
-import { toDataInstance } from 'spyret';
+## JavaScript
 
-const instance = toDataInstance(pyretValue, runtime);
-// Pass instance directly to Spytial-Core's evaluator/layout APIs.
+```sh
+npm install spyret
 ```
-
-`toDataInstance` accepts a value and the standard Pyret runtime that owns it.
-Spyret handles capture, relationalization and validation and returns an
-`IDataInstance`. Core handles queries, layout and rendering. No
-`spytial-core/data` entry point or Core runtime is needed inside Spyret.
-
-For transport between processes, use `capturePyret` with
-`createPyretRuntimeAdapter(runtime)`, then `importPyretCapture` at the receiver.
-The receiver needs neither Pyret nor an IDE. Use `getSpytialSpec` to collect
-layout rules alongside values; YAML interpretation stays in Core.
-
-See [the capture contract](docs/PYRET_CAPTURE.md) for supported values and limits.
-Closures are not serialized. Source preview is separate from structural capture.
-
-## Layout rules in Pyret
-
-The package includes `pyret/spytial.arr`, a typed rule library generated from
-Core's language manifest. Copy or serve that file where your Pyret program can
-import it (Node hosts can locate it with `require.resolve('spyret/spytial.arr')`).
-
-```pyret
-import file("spytial.arr") as S
-
-data Tree:
-  | leaf(value)
-  | branch(children)
-sharing:
-  method _spytial(self) -> List<S.SpytialRule>:
-    [list:
-      S.orientation("children", [list: S.direction-below]),
-      S.align("siblings", S.alignment-horizontal)
-    ]
-  end
-end
-```
-
-Public constructors wrap their results as `constraint(Constraint)` or
-`directive(Directive)` automatically. Compose rules with ordinary Pyret lists;
-the serializer puts each rule in its proper YAML section. Optional fields and
-style blocks have typed, immutable setters:
-
-```pyret
-S.atom-style-with(S.default-atom-style-options
-  .with-selector("leaf")
-  .with-fill-style(S.default-fill-style.with-color("red")))
-```
-
-From the JavaScript host, after evaluating the program:
 
 ```js
 import { toDataInstance, getSpytialSpec } from 'spyret';
 
+// Use the Pyret runtime that owns the value, while it is idle or paused.
 const instance = toDataInstance(pyretValue, runtime);
 const specs = await getSpytialSpec(pyretValue, runtime); // string[]
+// Pass the data and layout specs to Spytial-Core.
 ```
 
-The collector walks reachable values in breadth-first order, including lists,
-objects, tuples, arrays, references, dictionaries and table cells. It handles
-cycles and invokes each distinct `_spytial` function or method once per call,
-with methods bound to their first encountered owner. Repeated hooks never stop
-the traversal of an instance's children. Hooks should describe types, independent
-of the particular instance; unobserved datatype variants cannot be discovered.
+`toDataInstance` returns an `IDataInstance` and never invokes hooks. The collector
+handles cycles and calls each distinct hook once. See the
+[hook contract and typed rules](docs/SPYTIAL_HOOKS.md) for composition, errors and
+runtime requirements. For portable snapshots and reconstruction, see the
+[capture API](docs/PYRET_CAPTURE.md).
 
-Each hook returns `List<SpytialRule>`, serialized as one YAML document. A raw YAML
-string is also accepted as an escape hatch, unchanged and unvalidated. No hooks
-yields `[]`; a hook returning an empty list yields one empty spec. Identical
-documents from different hooks remain separate. Hook failures, malformed rules
-and unsupported values reject the promise with a `SpytialSpecError` and path.
+## Pyret: import, describe, display
 
-Hooks execute user code. Call the async collector while its owning runtime is
-idle or paused; a native Pyret module can use `runtime.pauseStack` around the
-promise. `spytialRulesToYaml(rules, runtime)` also serializes an already evaluated
-rule list directly. Capture and `toDataInstance` never invoke hooks, and omit
-callable `_spytial` metadata on ordinary objects or outside a datatype's declared
-slots. Other capture restrictions still apply.
+Once a library maintainer has [hosted the library](docs/BROWSER_LIBRARY.md),
+users can import its generated `.arr` wrapper in CPO, describe a type's layout
+with `_spytial`, and call `diagram`:
 
-See the [generated rule reference](docs/SPYTIAL_RULES_REFERENCE.md) for every
-constructor, enum and option. Pyret annotations check field types; serialization
-checks numeric bounds, string patterns and incompatible directions. Selector
-meaning and result arity remain Core's responsibility.
+```pyret
+# Replace this placeholder with the hosted wrapper URL.
+import url("https://YOUR_HOST/spyret.arr") as S
 
-To update the API, pin the desired Core release in `package.json` and the lockfile,
-then run `npm run generate:spytial`. Commit the generated Pyret source, serializer
-schema and reference together. `npm run check:spytial` and the tests detect drift;
-unknown field types or enum vocabularies fail generation for explicit handling.
-No Core runtime dependency is added to the published package.
+data Tree:
+  | leaf(value)
+  | branch(left, right)
+sharing:
+  method _spytial(self):
+    [list: S.orientation("left + right", [list: S.direction-below])]
+  end
+end
+
+S.diagram(branch(leaf(1), leaf(2)))
+```
+
+`diagram` collects the reachable types' rules, relationalizes the value and displays
+a diagram. Compose rules with ordinary Pyret lists; constructors such as
+`orientation`, `align` and `group` handle their constraint/directive category.
+`S.diagram([list: 1, 2, 3])` also works without any hooks. To supply rules explicitly,
+use `S.diagram-with-rules(value, rules)`, or `S.diagram(value, yaml)` for YAML.
+See the [rule reference](docs/SPYTIAL_RULES_REFERENCE.md) for available constructors.
+
+The import form depends on the host and file:
+
+| Import | What it loads |
+| --- | --- |
+| `url("https://…/spyret.arr")` | The generated Pyret wrapper: typed rules and diagram functions in one import. It imports the native module from Drive internally. |
+| `gdrive-js("spyret.js", "DRIVE_FILE_ID")` | The native JavaScript module in CPO, providing diagram functions. |
+| `js-file("path/to/spyret")` | The same native module in a browser host with a filesystem bridge. |
+
+A plain `url(...)` import cannot load native JavaScript. The packaged renderer
+supports CPO; other browser hosts need an adapter. No changes to CPO itself are
+required, although the library uses private CPO display APIs. **There is no
+published library URL yet**; see the [hosting walkthrough](docs/BROWSER_LIBRARY.md)
+for building, uploading to Drive and generating the wrapper.
+
+Spyret owns Pyret adaptation and display integration; Core owns layout semantics
+and graph rendering. Spyret-IDE can consume this library through a small wrapper;
+its migration is a [separate companion change](docs/IDE_MIGRATION.md).
 
 ## Development
 
-Requires Node 22 or later. The development dependency on released Core 6.3.1
+Requires Node 22 or later. The development dependency on released Core 6.3.2
 provides its public interface types and tests layout/query compatibility.
 Published Spyret builds include those type declarations and have no Core runtime
 dependency.
@@ -140,7 +119,8 @@ CommonJS and ES modules import `spyret`. The browser bundle is
 ## npm releases
 
 Published builds contain Spyret's adapter and bundled interface declarations.
-Hosts can use Core 6.3.1 for layout and rendering; Core 6.3.2 is not required.
+The standalone browser module loads Core 6.3.2; headless consumers do not need
+a Core runtime.
 `npm run test:package` verifies the actual tarball in an isolated consumer.
 Version tags trigger the unit/package suite and both upstream PBT seeds before
 publishing. See [release setup and commands](docs/RELEASING.md).
