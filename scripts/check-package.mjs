@@ -13,8 +13,8 @@ fs.mkdirSync(destination, { recursive: true });
 try {
   const [packed] = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', destination], { encoding: 'utf8' }));
   const files = new Set(packed.files.map(f => f.path));
-  for (const file of ['dist/spyret.js', 'dist/spyret.mjs', 'dist/spyret.global.js', 'dist/spyret.d.ts', 'dist/spyret.d.mts', 'LICENSE', 'THIRD_PARTY_NOTICES.txt']) assert.ok(files.has(file), `Missing ${file}`);
-  assert.ok([...files].every(f => /^(dist\/|docs\/|package.json$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.txt$)/.test(f)), 'Unexpected package contents');
+  for (const file of ['dist/spyret.js', 'dist/spyret.mjs', 'dist/spyret.global.js', 'dist/spyret.d.ts', 'dist/spyret.d.mts', 'pyret/spytial.arr', 'LICENSE', 'THIRD_PARTY_NOTICES.txt']) assert.ok(files.has(file), `Missing ${file}`);
+  assert.ok([...files].every(f => /^(dist\/|docs\/|pyret\/|package.json$|README.md$|LICENSE$|THIRD_PARTY_NOTICES.txt$)/.test(f)), 'Unexpected package contents');
   const consumer = path.join(scratch, 'consumer'); fs.mkdirSync(consumer);
   fs.writeFileSync(path.join(consumer, 'package.json'), '{"private":true,"type":"module"}\n');
   execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', path.join(destination, packed.filename)], { cwd: consumer, stdio: 'pipe' });
@@ -30,6 +30,7 @@ try {
     import * as esm from 'spyret';
     const require = createRequire(import.meta.url);
     const cjs = require('spyret');
+    assert.match(fs.readFileSync(require.resolve('spyret/spytial.arr'), 'utf8'), /data SpytialRule:/);
     const realm = vm.createContext({});
     vm.runInContext(fs.readFileSync(require.resolve('spyret/global'), 'utf8'), realm);
     for (const api of [esm, cjs, realm.Spyret]) {
@@ -44,6 +45,8 @@ try {
       assert.equal(a.dict.flag, true);
       assert.equal(imported.instance.generateGraph().nodeCount(), imported.instance.getAtoms().length);
       assert.equal(typeof api.prepareDiagram, 'function');
+      assert.equal(typeof api.getSpytialSpec, 'function');
+      assert.equal(typeof api.spytialRulesToYaml, 'function');
     }
     assert.equal(typeof window, 'undefined');
     console.log('Packed CJS, ESM and browser APIs preserve sharing/cycles without Core');
@@ -60,6 +63,9 @@ try {
     const snapshot = spyret.capturePyret([{name: 'n', value: 1}], adapter);
     const restored = spyret.importPyretCapture(snapshot);
     const id: string = restored.instance.getAtoms()[0].id;
+    declare const runtime: spyret.SpytialRuntime;
+    const specs: Promise<string[]> = spyret.getSpytialSpec(42, runtime);
+    const yaml: string = spyret.spytialRulesToYaml(null, runtime);
   `;
   fs.writeFileSync(path.join(consumer, 'types.mts'), "import * as spyret from 'spyret';\n" + useTypes);
   fs.writeFileSync(path.join(consumer, 'types.cts'), "import spyret = require('spyret');\n" + useTypes);

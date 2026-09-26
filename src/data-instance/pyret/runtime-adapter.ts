@@ -74,7 +74,8 @@ export function createPyretRuntimeAdapter(runtime: PyretCaptureRuntime): PyretRu
       const info = constructorInfo(v);
       if (!info || !v.$constructor || typeof v.$constructor !== 'object') throw new Error('Invalid Pyret constructor metadata');
       for (const field in v.dict) {
-        if (!info.fields.includes(field) && field !== '$fieldNames' && !runtime.isMethod(v.dict[field])) {
+        if (!info.fields.includes(field) && field !== '$fieldNames' && !runtime.isMethod(v.dict[field])
+            && !(field === '_spytial' && runtime.isFunction(v.dict[field]))) {
           throw new Error(`Unsupported extra constructor field ${JSON.stringify(field)}`);
         }
       }
@@ -91,7 +92,11 @@ export function createPyretRuntimeAdapter(runtime: PyretCaptureRuntime): PyretRu
         throw new Error('Unsupported branded Pyret object');
       }
       const fields: Array<[string, unknown]> = [];
-      for (const name in v.dict) fields.push([name, v.dict[name]]);
+      for (const name in v.dict) {
+        // Layout hooks are behavior, like datatype methods, not captured state.
+        if (name === '_spytial' && (runtime.isFunction(v.dict[name]) || runtime.isMethod(v.dict[name]))) continue;
+        fields.push([name, v.dict[name]]);
+      }
       return { kind: 'object', fields };
     }
     throw new Error('Unsupported value from this Pyret runtime');

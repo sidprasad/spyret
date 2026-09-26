@@ -14,7 +14,8 @@
   "files": [
     "dist",
     "docs",
-    "THIRD_PARTY_NOTICES.txt"
+    "THIRD_PARTY_NOTICES.txt",
+    "pyret"
   ],
   "exports": {
     ".": {
@@ -27,17 +28,21 @@
         "default": "./dist/spyret.js"
       }
     },
-    "./global": "./dist/spyret.global.js"
+    "./global": "./dist/spyret.global.js",
+    "./spytial.arr": "./pyret/spytial.arr"
   },
   "scripts": {
-    "build": "tsup && node scripts/write-notices.mjs",
+    "build": "npm run check:spytial && tsup && node scripts/write-notices.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:upstream": "node scripts/check-pyret-capture.mjs",
     "test:program": "node scripts/check-pyret-capture-program.mjs",
     "test:pbt": "node scripts/check-pyret-pbt.mjs",
     "prepack": "npm run typecheck && npm run build",
-    "test:package": "npm run build && node scripts/check-package.mjs"
+    "test:package": "npm run build && node scripts/check-package.mjs",
+    "generate:spytial": "node scripts/generate-spytial.mjs",
+    "check:spytial": "node scripts/generate-spytial.mjs --check",
+    "test:spytial": "node scripts/check-spytial-program.mjs"
   },
   "engines": {
     "node": ">=22"

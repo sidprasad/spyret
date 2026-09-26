@@ -62,8 +62,10 @@ inspect its nominal token/display spelling.
 
 No printer or arbitrary annotation runs during capture. Declared datatype methods
 are behavior supplied by declarations and are outside the declared-slot state
-contract; this includes `_output`. Non-method extension fields on data values
-are rejected instead of dropped. Functions/methods in state-bearing slots,
+contract; this includes `_output`. Callable `_spytial` metadata is also omitted
+on ordinary objects and outside a datatype's declared slots; collecting layout
+rules is a separate, explicit operation. Other non-method extension fields on
+data values are rejected instead of dropped. Functions/methods in state-bearing slots,
 opaque values, unrecognized branded library objects, standalone table Row
 values, sparse arrays, unset/frozen references, and arbitrary reference
 annotations produce explicit diagnostics. This API does not serialize closures

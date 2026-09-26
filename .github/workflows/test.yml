@@ -45,6 +45,7 @@ jobs:
           mkdir -p reports
           npm run test:upstream -- ../pyret/lang reports/runtime.json
           npm run test:program -- ../pyret/lang reports/program.json
+          npm run test:spytial -- ../pyret/lang reports/spytial.json
           npm run test:pbt -- ../pyret/lang reports/pbt.json
         working-directory: spyret
         env:
