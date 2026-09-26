@@ -65,7 +65,7 @@ describe('generated Pyret rules', () => {
     for (const [file, content] of Object.entries(generate(manifest))) {
       expect(fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8')).toBe(content);
     }
-    expect(spytialSchema.coreVersion).toBe('6.3.1');
+    expect(spytialSchema.coreVersion).toBe('6.3.2');
     expect(Object.keys(spytialSchema.rules)).toEqual(manifest.items.map((i: any) => i.id));
   });
 

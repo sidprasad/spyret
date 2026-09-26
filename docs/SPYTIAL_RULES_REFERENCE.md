@@ -1,6 +1,6 @@
 # Generated Pyret rule reference
 
-Core 6.3.1; language 2026-09-18.
+Core 6.3.2; language 2026-09-18.
 
 Import `pyret/spytial.arr` as `S`. Constructors return `S.SpytialRule` automatically.
 Optional fields use typed options. Start with `S.default-<rule>-options`,
