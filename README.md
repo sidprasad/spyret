@@ -26,7 +26,8 @@ For transport between processes, use `capturePyret` with
 The receiver needs neither Pyret nor an IDE. Collecting layout YAML alongside
 values can be added to Spyret later; YAML interpretation stays in Core.
 
-See [the capture contract](docs/PYRET_CAPTURE.md) for supported values and limits.
+See [the capture contract](docs/PYRET_CAPTURE.md) for supported values and limits,
+and [the table representation](docs/PYRET_TABLES.md) for editable table data.
 Closures are not serialized. Source preview is separate from structural capture.
 
 ## Development
