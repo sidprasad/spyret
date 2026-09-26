@@ -7,10 +7,8 @@ integration is a separate `spyret/browser` entry.
 
 ## Import a published version in CPO
 
-Tagged releases always include a versioned native module on GitHub. If Google
-Drive automation is configured, the release also publishes the native module
-and a wrapper to Drive. Copy the exact import line from that version's GitHub
-release notes (or its `spyret-vVERSION-drive.json` asset):
+A maintainer runs `npm run release:drive` and follows the
+[manual upload instructions](RELEASING.md). Use the import line they supply:
 
 ```pyret
 import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
@@ -20,10 +18,7 @@ S.diagram([list: 1, 2, 3])
 
 To upgrade, replace the import line with the one from the newer release. The
 wrapper imports the matching native module by its own Drive ID, so users need
-only one import. A maintainer can also [publish the released native asset with
-their own Google account](RELEASING.md#publish-a-released-version-manually-with-your-google-account)
-and put the generated wrapper on GitHub. That route gives users a single
-`url("https://raw.githubusercontent.com/…/spyret-vVERSION.arr")` import.
+only one import for typed constructors and diagram functions.
 
 ## An ordinary native import in CPO
 
@@ -53,44 +48,6 @@ The `diagram` functions live in the native JavaScript module, so a full Spyret
 import in stock CPO still needs its `gdrive-js` locator. A local browser host
 with a filesystem bridge can use `js-file` after downloading that release's
 native asset.
-
-## One URL import for rules and diagrams
-
-For a manual deployment, after building and uploading the native file:
-
-```sh
-npm run make:drive-wrapper -- YOUR_DRIVE_FILE_ID release/spyret.arr
-```
-
-Serve the generated `.arr` over HTTPS with CORS enabled (or put it on Drive and
-use Pyret's shared module import). This wrapper contains the generated rule types
-and imports the native Drive module, so a program needs only:
-
-```pyret
-import url("https://YOUR_HOST/spyret.arr") as S
-
-data Tree:
-  | leaf(n)
-  | branch(left, right)
-sharing:
-  method _spytial(self):
-    [list:
-      S.orientation("left + right", [list: S.direction-below]),
-      S.atom-style-with(S.default-atom-style-options
-        .with-selector("leaf")
-        .with-fill-style(S.default-fill-style.with-color("lightblue")))
-    ]
-  end
-end
-
-S.diagram(branch(leaf(1), leaf(2)))
-```
-
-These are placeholders for the manual route. With Drive automation configured,
-the tagged release workflow uploads both files to Drive under versioned names
-and publishes a ready-to-use `shared-gdrive` import. Generate and host the
-wrapper and native file from the same Spyret release. Avoid overwriting a shared
-release in place: importers may cache it.
 
 ## Diagram operations
 
@@ -136,6 +93,5 @@ The browser harness lives in `tests/browser-import/run.mjs`:
 
 Tests cover typed hooks, no-hook values, finite graph positions, Core zoom,
 ordinary images/numbers, and reruns. This proves the import/display mechanism,
-not live Google permissions or a deployed shared file. The release workflow
-checks Drive API access and public reader permissions, but a live CPO import
-remains a release smoke check.
+not live Google permissions or a deployed shared file. Run the example printed
+by `npm run release:drive` in CPO after uploading to check permissions and rendering.

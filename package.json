@@ -55,7 +55,8 @@
     "generate:spytial": "node scripts/generate-spytial.mjs",
     "check:spytial": "node scripts/generate-spytial.mjs --check",
     "test:spytial": "node scripts/check-spytial-program.mjs",
-    "make:drive-wrapper": "node scripts/make-drive-wrapper.mjs"
+    "make:drive-wrapper": "node scripts/make-drive-wrapper.mjs",
+    "release:drive": "node scripts/prepare-drive-release.mjs"
   },
   "engines": {
     "node": ">=22"

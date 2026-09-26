@@ -1,151 +1,26 @@
-# Releasing Spyret
+# Releasing Spyret to Google Drive
 
-Spyret is published as the public npm package `spyret`. The CJS, ESM, browser and
-TypeScript entry points contain Spyret's adapters and bundled data contract
-declarations, with no Core runtime dependency. The host passes the returned
-`IDataInstance` to Core for layout/rendering; compatibility tests use Core 6.3.1.
-
-## One-time npm setup
-
-The first package publication requires an npm maintainer login. From a checked,
-merged release commit, run:
+With Node 22+, [GitHub CLI](https://cli.github.com/), and `tar` installed, run
+from this checkout (no `npm install` or build needed):
 
 ```sh
-npm login
-npm ci
-npm run typecheck
-npm test
-npx --yes --package npm@11.20.0 -c 'npm run test:package -- --out release'
-npx --yes --package npm@11.20.0 npm publish ./release/spyret-0.1.0.tgz --access public
+npm run release:drive
 ```
 
-Also require green upstream PBT CI for this commit before publishing. The package
-check installs the actual tarball into an empty project and exercises
-CJS, ESM, browser and TypeScript consumers.
+The script downloads the latest GitHub release and walks you through:
 
-After the package exists, configure its npm **Trusted Publisher** settings:
+1. Upload the prepared `.js` file to your Google Drive. Set **Anyone with the
+   link / Viewer**, then paste its Drive link into the script.
+2. Upload the generated `.arr` file with the same sharing setting and paste
+   its Drive link into the script.
+3. Copy the printed import into CPO and run the provided diagram example.
+   Share that import line with users: it includes typed constructors and diagrams.
 
-| Setting | Value |
-| --- | --- |
-| Provider | GitHub Actions |
-| Organization/user | `sidprasad` |
-| Repository | `spyret` |
-| Workflow filename | `release.yml` |
-| Environment | Leave empty |
-| Allowed action | Enable direct `npm publish` |
+Keep both filenames unchanged and upload them as files without conversion.
+The two upload files are in `release/vVERSION/upload/`; the CPO example is
+saved separately as `release/vVERSION/import.arr`. Keep published Drive files
+unchanged so existing imports continue to work.
 
-With npm 11.15 or later, the equivalent command is:
-
-```sh
-npm trust github spyret --repo sidprasad/spyret --file release.yml --allow-publish
-```
-
-See [npm's trusted publishing documentation](https://docs.npmjs.com/trusted-publishers/).
-No npm token needs to be stored in GitHub. Publishing uses OIDC and provenance.
-
-## Optional Google Drive automation for CPO imports
-
-When configured, tagged releases also publish two versioned files to a **Google shared drive**:
-`spyret-vVERSION.js` (the native module) and `spyret-vVERSION.arr` (the Pyret
-wrapper). A service account cannot own files in a personal My Drive; it must be
-able to create files in a shared drive folder. The two files are granted
-`anyone`/`reader` access so CPO users can import them. Confirm that your shared
-drive permits public file sharing before enabling this workflow.
-
-1. Enable the Google Drive API in a Google Cloud project. Create a service
-   account and add it as a **Contributor** (or a role with equivalent file
-   creation and sharing rights) to a dedicated shared drive. Create a folder
-   for Spyret releases in that drive. The service account should have no access
-   to unrelated files.
-2. Configure [GitHub OIDC to Google Cloud](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-google-cloud-platform)
-   and [service account impersonation](https://github.com/google-github-actions/auth#workload-identity-federation-through-a-service-account).
-   Restrict the provider to this repository and release tag refs, then grant
-   that identity `roles/iam.workloadIdentityUser` on the service account. This
-   avoids storing a long-lived Google key in GitHub.
-3. Set these GitHub Actions **repository variables**:
-
-   | Variable | Value |
-   | --- | --- |
-   | `GOOGLE_WIF_PROVIDER` | Full Workload Identity Provider resource name (`projects/NUMBER/locations/global/workloadIdentityPools/POOL/providers/PROVIDER`) |
-   | `GOOGLE_SERVICE_ACCOUNT` | Service account email |
-   | `SPYRET_DRIVE_FOLDER_ID` | ID of the dedicated folder in the shared drive |
-
-The workflow requests a short-lived Drive access token after creating the npm and
-GitHub releases, then creates the versioned files. It checks the existing file's
-MIME type, size, and checksum before reusing it, so a rerun cannot silently
-replace a version with different content. If Drive authentication, sharing, or upload fails,
-the npm package and GitHub release remain available; fix the configuration and
-rerun the job against the same tag.
-An npm version already published by the first run is accepted only if its
-integrity matches the tested tarball.
-
-## Later releases
-
-1. On a release branch, run `npm version patch --no-git-tag-version` (or choose a
-   minor/major bump), commit both manifests, and merge after CI passes.
-2. On the updated `main`, tag that exact commit and push the tag:
-
-   ```sh
-   git tag v0.1.2
-   git push origin v0.1.2
-   ```
-
-3. `release.yml` verifies the tag matches `package.json` and belongs to `main`,
-   runs the unit/package suite and both standard-Pyret PBT seeds, tests the packed
-   artifact, publishes it to npm, and attaches the package and native module to
-   a GitHub release. With all three Drive variables configured, it also creates
-   public versioned Drive imports and attaches the wrapper and manifest. The
-   release notes and workflow summary then include the exact CPO import.
-
-Prerelease versions publish under `next`; stable versions use `latest`. A failed
-workflow can be rerun or manually dispatched against the same **tag**. An existing
-npm version is accepted only when its integrity matches the tested tarball;
-different contents require a version bump.
-
-Version 0.1.0 was bootstrapped manually. Subsequent versions use the tagged
-workflow. It installs its pinned npm into a separate tools directory so npm
-does not replace itself while running.
-
-The wrapper is imported with `shared-gdrive`, using the name and ID printed in
-the release notes. Updating a program to a new Spyret version means replacing
-that single import line. Previous Drive files and IDs remain intact; Drive IDs
-are intentionally different for each release. Older tags do not contain this
-workflow; publish a new tag after merging these changes.
-
-## Publish a released version manually with your Google account
-
-No service account or shared drive is needed for this route. Download the exact
-`spyret-vVERSION.js` and `spyret-VERSION.tgz` assets from the GitHub release
-into a local `release/` directory.
-The existing `v0.1.1` release is headless and has no native Pyret module;
-this route starts with a release that includes `spyret-vVERSION.js`.
-Upload the JavaScript file to your own Google Drive **without conversion**, keep
-its exact filename, and set General access to **Anyone with the link / Viewer**.
-Copy the native file ID from its Drive URL. This user account is the principal
-that owns and shares the file.
-
-From a checkout containing `scripts/make-drive-wrapper.mjs`, generate a wrapper
-using the rules from the released package, not the current source tree:
-
-```sh
-VERSION=0.2.0
-NATIVE_DRIVE_FILE_ID=your-file-id
-mkdir -p "releases/v$VERSION"
-tar -xOzf "release/spyret-$VERSION.tgz" package/pyret/spytial.arr > /tmp/spyret-rules.arr
-node scripts/make-drive-wrapper.mjs "$NATIVE_DRIVE_FILE_ID" \
-  "releases/v$VERSION/spyret-v$VERSION.arr" "spyret-v$VERSION.js" /tmp/spyret-rules.arr
-```
-
-Commit and push the generated `.arr` file. Once that commit is on GitHub, use
-its full commit SHA in the Pyret import URL:
-
-```pyret
-import url("https://raw.githubusercontent.com/sidprasad/spyret/WRAPPER_COMMIT_SHA/releases/v0.2.0/spyret-v0.2.0.arr") as S
-```
-
-The raw GitHub URL serves Pyret source, while that wrapper imports the native
-module through CPO's `gdrive-js` locator. Pinning the commit keeps a released
-import stable if the default branch changes. Open CPO and run
-`S.diagram([list: 1, 2, 3])` as a live permission and rendering check. If you
-prefer to host both files in Drive, upload the generated `.arr` file too, share
-it publicly, and use `shared-gdrive("spyret-vVERSION.arr", "WRAPPER_ID")`.
+To select a specific release, use `npm run release:drive -- --tag v0.2.0`.
+The release must contain the browser module and Pyret rules; `v0.1.1` is headless
+and cannot be used. No Google Cloud project, service account, or API setup is needed.

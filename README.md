@@ -36,12 +36,12 @@ runtime requirements. For portable snapshots and reconstruction, see the
 
 ## Pyret: import, describe, display
 
-Once a library maintainer has [published a version](docs/BROWSER_LIBRARY.md),
-users can import its versioned `.arr` wrapper in CPO, describe a type's layout
-with `_spytial`, and call `diagram`:
+A maintainer runs `npm run release:drive` and follows the
+[manual upload instructions](docs/RELEASING.md). Users then import the versioned
+wrapper in CPO to get typed rule constructors and diagram functions together:
 
 ```pyret
-# Copy the exact versioned name and ID from the release notes.
+# Use the import line supplied by the library maintainer.
 import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
 
 data Tree:
@@ -75,8 +75,7 @@ The import form depends on the host and file:
 A plain `url(...)` import cannot load native JavaScript. The packaged renderer
 supports CPO; other browser hosts need an adapter. No changes to CPO itself are
 required, although the library uses private CPO display APIs. See the
-[hosting and import guide](docs/BROWSER_LIBRARY.md) and the [GitHub releases](https://github.com/sidprasad/spyret/releases)
-for the import line of a published version.
+[hosting and import guide](docs/BROWSER_LIBRARY.md) for details about published imports.
 
 Spyret owns Pyret adaptation and display integration; Core owns layout semantics
 and graph rendering. Spyret-IDE can consume this library through a small wrapper;
@@ -124,8 +123,9 @@ The standalone browser module loads Core 6.3.2; headless consumers do not need
 a Core runtime.
 `npm run test:package` verifies the actual tarball in an isolated consumer.
 Version tags trigger the unit/package suite and both upstream PBT seeds before
-publishing to npm and GitHub. Drive publication is optional and can also be done
-manually with your own Google account. See [release setup and commands](docs/RELEASING.md).
+publishing to npm and GitHub. To prepare the latest release for Google Drive,
+run `npm run release:drive` and follow the upload prompts.
+See [manual release instructions](docs/RELEASING.md).
 
 ## Migration and provenance
 
