@@ -10,7 +10,7 @@ const provides = { values: {
   'diagram-with-rules': ['arrow', ['Any', 'Any'], 'Any'],
   genlayout: ['arrow', ['Any', 'String'], 'Any'],
 } };
-fs.writeFileSync('dist/spyret.pyret.js', `// Spyret ${pkg.version}. Generated; upload this file to Google Drive as spyret.js.
+fs.writeFileSync('dist/spyret.pyret.js', `// Spyret ${pkg.version}. Generated native Pyret module for Google Drive.
 ({
   requires: [], nativeRequires: [],
   provides: ${JSON.stringify(provides)},

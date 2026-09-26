@@ -5,7 +5,25 @@ views and CPO display registration. Core still owns the layout language, solver
 and graph component. The default JavaScript entry remains headless; browser
 integration is a separate `spyret/browser` entry.
 
-## An ordinary import in CPO
+## Import a published version in CPO
+
+Each successful tagged release publishes a versioned native module and wrapper
+to Google Drive. Copy the exact import line from that version's GitHub release
+notes (or its `spyret-vVERSION-drive.json` asset):
+
+```pyret
+import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
+
+S.diagram([list: 1, 2, 3])
+```
+
+To upgrade, replace the import line with the one from the newer release. The
+wrapper imports the matching native module by its own Drive ID, so users need
+only one import. See [release setup](RELEASING.md#one-time-google-drive-setup-for-cpo-imports)
+for the maintainer configuration. Releases made before this workflow do not
+have a Drive import; publish a new version after setup.
+
+## An ordinary native import in CPO
 
 CPO already supports native Pyret modules through `gdrive-js`. Upload the built
 `dist/spyret.pyret.js` to Google Drive **as `spyret.js`**, and grant intended users
@@ -29,7 +47,7 @@ CPO output support; Node consumers use the headless JavaScript APIs instead.
 
 ## One URL import for rules and diagrams
 
-From this repository, after building and uploading the native file:
+For a manual deployment, after building and uploading the native file:
 
 ```sh
 npm run make:drive-wrapper -- YOUR_DRIVE_FILE_ID release/spyret.arr
@@ -59,9 +77,11 @@ end
 S.diagram(branch(leaf(1), leaf(2)))
 ```
 
-These are hosting placeholders, not published URLs or Drive IDs. Generate and
-host the wrapper and native file from the same Spyret release. Avoid overwriting
-a shared release in place: importers may cache it.
+These are placeholders for the manual route. The tagged release workflow instead
+uploads both files to Drive under versioned names and publishes a ready-to-use
+`shared-gdrive` import. Generate and host the wrapper and native file from the
+same Spyret release. Avoid overwriting a shared release in place: importers may
+cache it.
 
 ## Diagram operations
 
@@ -107,5 +127,6 @@ The browser harness lives in `tests/browser-import/run.mjs`:
 
 Tests cover typed hooks, no-hook values, finite graph positions, Core zoom,
 ordinary images/numbers, and reruns. This proves the import/display mechanism,
-not live Google permissions or a deployed shared file. No live public library
-link is part of this checkout.
+not live Google permissions or a deployed shared file. The release workflow
+checks Drive API access and public reader permissions, but a live CPO import
+remains a release smoke check.
