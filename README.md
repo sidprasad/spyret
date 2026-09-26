@@ -36,13 +36,13 @@ runtime requirements. For portable snapshots and reconstruction, see the
 
 ## Pyret: import, describe, display
 
-Once a library maintainer has [hosted the library](docs/BROWSER_LIBRARY.md),
-users can import its generated `.arr` wrapper in CPO, describe a type's layout
-with `_spytial`, and call `diagram`:
+A maintainer runs `npm run release:drive` and follows the
+[manual upload instructions](docs/RELEASING.md). Users then import the versioned
+wrapper in CPO to get typed rule constructors and diagram functions together:
 
 ```pyret
-# Replace this placeholder with the hosted wrapper URL.
-import url("https://YOUR_HOST/spyret.arr") as S
+# Use the import line supplied by the library maintainer.
+import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
 
 data Tree:
   | leaf(value)
@@ -67,15 +67,15 @@ The import form depends on the host and file:
 
 | Import | What it loads |
 | --- | --- |
-| `url("https://…/spyret.arr")` | The generated Pyret wrapper: typed rules and diagram functions in one import. It imports the native module from Drive internally. |
-| `gdrive-js("spyret.js", "DRIVE_FILE_ID")` | The native JavaScript module in CPO, providing diagram functions. |
+| `shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID")` | The versioned release wrapper in CPO: typed rules and diagram functions in one import. |
+| `url("https://raw.githubusercontent.com/…/spyret-vVERSION.arr")` | A GitHub-hosted Pyret wrapper: typed rules and diagram functions in one import. It imports the native module from Drive internally. |
+| `gdrive-js("spyret-vVERSION.js", "NATIVE_DRIVE_FILE_ID")` | The versioned native JavaScript module in CPO, providing diagram functions. |
 | `js-file("path/to/spyret")` | The same native module in a browser host with a filesystem bridge. |
 
 A plain `url(...)` import cannot load native JavaScript. The packaged renderer
 supports CPO; other browser hosts need an adapter. No changes to CPO itself are
-required, although the library uses private CPO display APIs. **There is no
-published library URL yet**; see the [hosting walkthrough](docs/BROWSER_LIBRARY.md)
-for building, uploading to Drive and generating the wrapper.
+required, although the library uses private CPO display APIs. See the
+[hosting and import guide](docs/BROWSER_LIBRARY.md) for details about published imports.
 
 Spyret owns Pyret adaptation and display integration; Core owns layout semantics
 and graph rendering. Spyret-IDE can consume this library through a small wrapper;
@@ -123,7 +123,9 @@ The standalone browser module loads Core 6.3.2; headless consumers do not need
 a Core runtime.
 `npm run test:package` verifies the actual tarball in an isolated consumer.
 Version tags trigger the unit/package suite and both upstream PBT seeds before
-publishing. See [release setup and commands](docs/RELEASING.md).
+publishing to npm and GitHub. To prepare the latest release for Google Drive,
+run `npm run release:drive` and follow the upload prompts.
+See [manual release instructions](docs/RELEASING.md).
 
 ## Migration and provenance
 

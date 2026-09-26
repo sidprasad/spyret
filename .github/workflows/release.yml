@@ -52,17 +52,20 @@ jobs:
       - run: npm ci
       - name: Pack and test the exact release artifact
         run: npm run test:package -- --out release
+      - name: Copy native Pyret module into release assets
+        run: cp dist/spyret.pyret.js "release/spyret-$GITHUB_REF_NAME.js"
       - name: Publish with npm trusted publishing
         run: node scripts/publish.mjs
-      - name: Attach package to GitHub release
+      - name: Attach package and native module to GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          assets=(release/*.tgz "release/spyret-$GITHUB_REF_NAME.js")
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" release/*.tgz --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
           else
             release_args=()
             if [[ "$GITHUB_REF_NAME" == *-* ]]; then release_args+=(--prerelease); fi
-            gh release create "$GITHUB_REF_NAME" release/*.tgz --repo "$GITHUB_REPOSITORY" \
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
               --verify-tag --title "$GITHUB_REF_NAME" --generate-notes "${release_args[@]}"
           fi

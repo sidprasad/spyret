@@ -5,7 +5,22 @@ views and CPO display registration. Core still owns the layout language, solver
 and graph component. The default JavaScript entry remains headless; browser
 integration is a separate `spyret/browser` entry.
 
-## An ordinary import in CPO
+## Import a published version in CPO
+
+A maintainer runs `npm run release:drive` and follows the
+[manual upload instructions](RELEASING.md). Use the import line they supply:
+
+```pyret
+import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
+
+S.diagram([list: 1, 2, 3])
+```
+
+To upgrade, replace the import line with the one from the newer release. The
+wrapper imports the matching native module by its own Drive ID, so users need
+only one import for typed constructors and diagram functions.
+
+## An ordinary native import in CPO
 
 CPO already supports native Pyret modules through `gdrive-js`. Upload the built
 `dist/spyret.pyret.js` to Google Drive **as `spyret.js`**, and grant intended users
@@ -27,41 +42,12 @@ filesystem bridge. Pyret's plain `url(...)` loader parses Pyret source, so it
 cannot load the JavaScript file directly. This browser module needs a DOM and
 CPO output support; Node consumers use the headless JavaScript APIs instead.
 
-## One URL import for rules and diagrams
-
-From this repository, after building and uploading the native file:
-
-```sh
-npm run make:drive-wrapper -- YOUR_DRIVE_FILE_ID release/spyret.arr
-```
-
-Serve the generated `.arr` over HTTPS with CORS enabled (or put it on Drive and
-use Pyret's shared module import). This wrapper contains the generated rule types
-and imports the native Drive module, so a program needs only:
-
-```pyret
-import url("https://YOUR_HOST/spyret.arr") as S
-
-data Tree:
-  | leaf(n)
-  | branch(left, right)
-sharing:
-  method _spytial(self):
-    [list:
-      S.orientation("left + right", [list: S.direction-below]),
-      S.atom-style-with(S.default-atom-style-options
-        .with-selector("leaf")
-        .with-fill-style(S.default-fill-style.with-color("lightblue")))
-    ]
-  end
-end
-
-S.diagram(branch(leaf(1), leaf(2)))
-```
-
-These are hosting placeholders, not published URLs or Drive IDs. Generate and
-host the wrapper and native file from the same Spyret release. Avoid overwriting
-a shared release in place: importers may cache it.
+For the generated Pyret rule constructors alone, a release tag needs no Drive
+file: `import url("https://raw.githubusercontent.com/sidprasad/spyret/vVERSION/pyret/spytial.arr") as R`.
+The `diagram` functions live in the native JavaScript module, so a full Spyret
+import in stock CPO still needs its `gdrive-js` locator. A local browser host
+with a filesystem bridge can use `js-file` after downloading that release's
+native asset.
 
 ## Diagram operations
 
@@ -107,5 +93,5 @@ The browser harness lives in `tests/browser-import/run.mjs`:
 
 Tests cover typed hooks, no-hook values, finite graph positions, Core zoom,
 ordinary images/numbers, and reruns. This proves the import/display mechanism,
-not live Google permissions or a deployed shared file. No live public library
-link is part of this checkout.
+not live Google permissions or a deployed shared file. Run the example printed
+by `npm run release:drive` in CPO after uploading to check permissions and rendering.
