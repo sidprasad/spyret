@@ -38,7 +38,7 @@ runtime requirements. For portable snapshots and reconstruction, see the
 
 Once a library maintainer has [hosted the library](docs/BROWSER_LIBRARY.md),
 users can import its generated `.arr` wrapper in CPO, describe a type's layout
-with `_spytial`, and call `show`:
+with `_spytial`, and call `diagram`:
 
 ```pyret
 # Replace this placeholder with the hosted wrapper URL.
@@ -53,13 +53,13 @@ sharing:
   end
 end
 
-S.show(branch(leaf(1), leaf(2)))
+S.diagram(branch(leaf(1), leaf(2)))
 ```
 
-`show` collects the reachable types' rules, relationalizes the value and displays
+`diagram` collects the reachable types' rules, relationalizes the value and displays
 a diagram. Compose rules with ordinary Pyret lists; constructors such as
 `orientation`, `align` and `group` handle their constraint/directive category.
-`S.show([list: 1, 2, 3])` also works without any hooks. To supply rules explicitly,
+`S.diagram([list: 1, 2, 3])` also works without any hooks. To supply rules explicitly,
 use `S.diagram-with-rules(value, rules)`, or `S.diagram(value, yaml)` for YAML.
 See the [rule reference](docs/SPYTIAL_RULES_REFERENCE.md) for available constructors.
 

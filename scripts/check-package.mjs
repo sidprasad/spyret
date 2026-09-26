@@ -35,7 +35,8 @@ try {
     assert.equal(typeof require('spyret/browser').createPyretModule, 'function');
     const native = vm.runInNewContext(fs.readFileSync(require.resolve('spyret/pyret-module'), 'utf8'));
     assert.equal(native.nativeRequires.length, 0);
-    assert.equal(native.provides.values.show[0], 'arrow');
+    assert.equal(native.provides.values.diagram, 'Any');
+    assert.ok(!('show' in native.provides.values));
     assert.match(fs.readFileSync(require.resolve('spyret/spytial.arr'), 'utf8'), /data SpytialRule:/);
     const realm = vm.createContext({});
     vm.runInContext(fs.readFileSync(require.resolve('spyret/global'), 'utf8'), realm);

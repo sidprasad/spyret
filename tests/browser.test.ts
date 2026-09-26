@@ -68,7 +68,7 @@ it('does not collect hooks or resume a stopped thread after Core finishes loadin
     pauseStack: (f: any) => f(restarter), safeCall: (thunk: any) => thunk() } as unknown as DiagramRuntime;
   const registerOutput = vi.fn();
   const module = createPyretModule(runtime, { document, core: () => pending, registerOutput }) as any;
-  module.show(42);
+  module.diagram(42);
   restarter.handlers.break();
   resolveCore({}); // Any attempted capture/layout would fail with this stub.
   await new Promise(resolve => setTimeout(resolve, 0));
@@ -77,4 +77,17 @@ it('does not collect hooks or resume a stopped thread after Core finishes loadin
   expect(restarter.resume).not.toHaveBeenCalled();
   expect(restarter.error).not.toHaveBeenCalled();
   expect(registerOutput).not.toHaveBeenCalled();
+});
+
+// Native imports accept either arity, so reject accidental extra/missing inputs
+// before loading assets or evaluating hooks.
+it.each([[], [42, '', 'extra']])('rejects unsupported diagram arity: %j', (...args) => {
+  const core = vi.fn();
+  const runtime = { makeFunction: (f: unknown) => f, makeModuleReturn: (values: unknown) => values,
+    ffi: { throwMessageException: (message: string) => { throw new Error(message); } }
+  } as unknown as DiagramRuntime;
+  const module = createPyretModule(runtime, { document, core, registerOutput: vi.fn() }) as any;
+  expect(module.show).toBeUndefined();
+  expect(() => module.diagram(...args)).toThrow(/expects a value/);
+  expect(core).not.toHaveBeenCalled();
 });

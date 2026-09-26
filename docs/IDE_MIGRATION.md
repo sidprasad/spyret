@@ -20,7 +20,7 @@ forwarding wrapper around
 `spyret/browser`. `spytial-rules` is a build-time copy of the generated Pyret
 module. Its old `spytial-view` module and Spytial branch in `output-ui` are removed.
 Existing `SP.diagram(value, yaml)` and `_output` methods continue to work; new
-programs can use `SP.show(value)` and typed rules.
+programs can use `SP.diagram(value)` and typed rules.
 
 Stock CPO can instead load `spyret/pyret-module` through its existing `gdrive-js`
 locator, optionally hidden behind one URL-imported `.arr` wrapper. No new native

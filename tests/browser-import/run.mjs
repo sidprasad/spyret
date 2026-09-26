@@ -1,4 +1,4 @@
-// Usage: node experiments/importable-spytial/run.mjs /path/to/pyret-embed/dist
+// Usage: node tests/browser-import/run.mjs /path/to/pyret-embed/dist
 // Add --test for the browser smoke test; set PUPPETEER_MODULE and CHROME_PATH.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -130,7 +130,7 @@ if (process.argv.includes('--test')) {
           if (document.querySelector('#output .compile-error, #output .error, .spyret-diagram[data-error]')) {
             throw new Error(document.querySelector('#output').innerText);
           }
-          return document.querySelectorAll('.spyret-diagram[data-rendered="true"][data-settled="true"]').length === 2;
+          return document.querySelectorAll('.spyret-diagram[data-rendered="true"][data-settled="true"]').length === 3;
         },
           { timeout: 120000 });
       } catch (error) {
@@ -153,10 +153,10 @@ if (process.argv.includes('--test')) {
           text: document.querySelector('#output').innerText
         };
       });
-      assert.deepEqual(state.specs, ['1', '0']);
+      assert.deepEqual(state.specs, ['1', '0', '1']);
       assert.ok(state.graphs.every(graph => graph.svgs > 0 && graph.height === 400 &&
         graph.positions.length > 0 && graph.positions.every(p => Number.isFinite(p.x) && Number.isFinite(p.y))),
-      'Both diagrams must have visible SVGs and finite node positions');
+      'All diagrams must have visible SVGs and finite node positions');
       assert.ok(state.images > 0, 'Stock image renderer must still work');
       assert.match(state.text, /42/);
       // Let Core's fit transition finish before exercising its zoom control.
@@ -168,8 +168,8 @@ if (process.argv.includes('--test')) {
       await frame.click('.spyret-diagram > button');
       assert.equal(await frame.$eval('.spyret-diagram', view => view.querySelectorAll('webcola-cnd-graph').length), 0);
       await frame.click('.spyret-diagram > button');
-      await frame.waitForFunction(() => document.querySelectorAll('.spyret-diagram[data-settled="true"]').length === 2);
-      console.log('Run ' + (run + 1) + ': typed hook, no hook, finite graph positions, image, number, zoom passed');
+      await frame.waitForFunction(() => document.querySelectorAll('.spyret-diagram[data-settled="true"]').length === 3);
+      console.log('Run ' + (run + 1) + ': typed hook, no hook, explicit YAML bypass, finite graph positions, image, number, zoom passed');
       if (run === 0 && !publicCpo) {
         await page.evaluate(() => window.embedAPI.clearInteractions());
         await frame.waitForFunction(() => document.querySelectorAll('.spyret-diagram').length === 0);

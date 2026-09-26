@@ -11,7 +11,6 @@ fs.mkdirSync(path.dirname(path.resolve(destination)), { recursive: true });
 fs.writeFileSync(destination, rules.replace('provide-types *\n', 'provide-types *\n' +
   `import gdrive-js("spyret.js", ${JSON.stringify(driveId)}) as NativeSpyret\n`) + `
 # Native module hosted on Google Drive; this wrapper can be served over HTTPS.
-show = NativeSpyret.show
 diagram = NativeSpyret.diagram
 diagram-with-rules = NativeSpyret.diagram-with-rules
 genlayout = NativeSpyret.genlayout

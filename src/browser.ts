@@ -167,8 +167,11 @@ export function createPyretModule(runtime: DiagramRuntime, host: BrowserHost): u
     }, 'Spyret.diagram');
   }
   return runtime.makeModuleReturn({
-    show: runtime.makeFunction(value => diagram(value, 'hooks'), 'show'),
-    diagram: runtime.makeFunction((value, spec) => diagram(value, 'yaml', spec), 'diagram'),
+    diagram: runtime.makeFunction((...args: unknown[]) => {
+      if (args.length === 1) return diagram(args[0], 'hooks');
+      if (args.length === 2) return diagram(args[0], 'yaml', args[1]);
+      return runtime.ffi.throwMessageException('Spyret.diagram expects a value and optionally a YAML string');
+    }, 'diagram'),
     'diagram-with-rules': runtime.makeFunction((value, rules) => diagram(value, 'rules', rules), 'diagram-with-rules'),
     genlayout: runtime.makeFunction((value, spec) => diagram(value, 'dom', spec), 'genlayout'),
   }, {});

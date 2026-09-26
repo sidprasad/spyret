@@ -4,8 +4,9 @@ const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const bundle = fs.readFileSync('dist/spyret-browser.global.js', 'utf8');
 const coreUrl = `https://cdn.jsdelivr.net/npm/spytial-core@${pkg.devDependencies['spytial-core']}/dist/browser/spytial-core-complete.global.js`;
 const provides = { values: {
-  show: ['arrow', ['Any'], 'Any'],
-  diagram: ['arrow', ['Any', 'String'], 'Any'],
+  // Pyret's native signature format has no optional-argument arrow.
+  // The implementation checks the supported one- and two-argument forms.
+  diagram: 'Any',
   'diagram-with-rules': ['arrow', ['Any', 'Any'], 'Any'],
   genlayout: ['arrow', ['Any', 'String'], 'Any'],
 } };

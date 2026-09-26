@@ -14,7 +14,7 @@ read access. Do not convert it to a Google document. With that file's ID:
 ```pyret
 import gdrive-js("spyret.js", "YOUR_DRIVE_FILE_ID") as Spyret
 
-Spyret.show([list: 1, 2, 3])
+Spyret.diagram([list: 1, 2, 3])
 ```
 
 The file bundles Spyret's browser implementation. It loads pinned Core 6.3.2
@@ -56,7 +56,7 @@ sharing:
   end
 end
 
-S.show(branch(leaf(1), leaf(2)))
+S.diagram(branch(leaf(1), leaf(2)))
 ```
 
 These are hosting placeholders, not published URLs or Drive IDs. Generate and
@@ -67,7 +67,7 @@ a shared release in place: importers may cache it.
 
 | Pyret operation | Behavior |
 | --- | --- |
-| `S.show(value)` | Collect reachable `_spytial` hooks and compose their YAML sections in discovery order. No hooks means an empty spec. |
+| `S.diagram(value)` | Collect reachable `_spytial` hooks and compose their YAML sections in discovery order. No hooks means an empty spec. |
 | `S.diagram(value, yaml)` | Use exactly the explicit YAML, preserving existing programs; does not invoke hooks. |
 | `S.diagram-with-rules(value, rules)` | Use an explicit Pyret list of `SpytialRule`; does not invoke hooks. |
 | `S.genlayout(value, yaml)` | Legacy DOM-returning entry; asset loading can suspend, so invoke through the runtime stack. Prefer opaque diagrams in Pyret programs. |
@@ -96,7 +96,7 @@ browser host adapter.
 
 ## Verification
 
-The browser harness lives in `experiments/importable-spytial/run.mjs`:
+The browser harness lives in `tests/browser-import/run.mjs`:
 
 - Default: real `js-file` import in published, unmodified `pyret-embed@0.1.8`.
 - `--drive`: one URL-imported wrapper, invoking the real upstream `gdrive-js`
