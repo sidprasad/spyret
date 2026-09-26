@@ -6,7 +6,7 @@ export function makeDriveWrapper(driveId, destination, nativeName = 'spyret.js',
   rulesSource = fileURLToPath(new URL('../pyret/spytial.arr', import.meta.url))) {
   if (!/^[A-Za-z0-9_-]+$/.test(driveId) || !destination ||
       !/^spyret(?:-v[0-9A-Za-z.-]+)?\.js$/.test(nativeName)) {
-    throw new Error('Usage: node scripts/make-drive-wrapper.mjs DRIVE_FILE_ID OUTPUT.arr [NATIVE_NAME.js]');
+    throw new Error('Usage: node scripts/make-drive-wrapper.mjs DRIVE_FILE_ID OUTPUT.arr [NATIVE_NAME.js] [RULES_SOURCE.arr]');
   }
   const rules = fs.readFileSync(rulesSource, 'utf8');
   const marker = 'provide-types *\n';
@@ -23,6 +23,6 @@ genlayout = NativeSpyret.genlayout
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const [driveId, destination, nativeName] = process.argv.slice(2);
-  console.log('Wrote ' + makeDriveWrapper(driveId, destination, nativeName));
+  const [driveId, destination, nativeName, rulesSource] = process.argv.slice(2);
+  console.log('Wrote ' + makeDriveWrapper(driveId, destination, nativeName, rulesSource));
 }

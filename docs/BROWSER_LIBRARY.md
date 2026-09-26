@@ -7,9 +7,10 @@ integration is a separate `spyret/browser` entry.
 
 ## Import a published version in CPO
 
-Each successful tagged release publishes a versioned native module and wrapper
-to Google Drive. Copy the exact import line from that version's GitHub release
-notes (or its `spyret-vVERSION-drive.json` asset):
+Tagged releases always include a versioned native module on GitHub. If Google
+Drive automation is configured, the release also publishes the native module
+and a wrapper to Drive. Copy the exact import line from that version's GitHub
+release notes (or its `spyret-vVERSION-drive.json` asset):
 
 ```pyret
 import shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID") as S
@@ -19,9 +20,10 @@ S.diagram([list: 1, 2, 3])
 
 To upgrade, replace the import line with the one from the newer release. The
 wrapper imports the matching native module by its own Drive ID, so users need
-only one import. See [release setup](RELEASING.md#one-time-google-drive-setup-for-cpo-imports)
-for the maintainer configuration. Releases made before this workflow do not
-have a Drive import; publish a new version after setup.
+only one import. A maintainer can also [publish the released native asset with
+their own Google account](RELEASING.md#publish-a-released-version-manually-with-your-google-account)
+and put the generated wrapper on GitHub. That route gives users a single
+`url("https://raw.githubusercontent.com/…/spyret-vVERSION.arr")` import.
 
 ## An ordinary native import in CPO
 
@@ -44,6 +46,13 @@ CPO. CPO's Drive access/authentication requirements still apply.
 filesystem bridge. Pyret's plain `url(...)` loader parses Pyret source, so it
 cannot load the JavaScript file directly. This browser module needs a DOM and
 CPO output support; Node consumers use the headless JavaScript APIs instead.
+
+For the generated Pyret rule constructors alone, a release tag needs no Drive
+file: `import url("https://raw.githubusercontent.com/sidprasad/spyret/vVERSION/pyret/spytial.arr") as R`.
+The `diagram` functions live in the native JavaScript module, so a full Spyret
+import in stock CPO still needs its `gdrive-js` locator. A local browser host
+with a filesystem bridge can use `js-file` after downloading that release's
+native asset.
 
 ## One URL import for rules and diagrams
 
@@ -77,11 +86,11 @@ end
 S.diagram(branch(leaf(1), leaf(2)))
 ```
 
-These are placeholders for the manual route. The tagged release workflow instead
-uploads both files to Drive under versioned names and publishes a ready-to-use
-`shared-gdrive` import. Generate and host the wrapper and native file from the
-same Spyret release. Avoid overwriting a shared release in place: importers may
-cache it.
+These are placeholders for the manual route. With Drive automation configured,
+the tagged release workflow uploads both files to Drive under versioned names
+and publishes a ready-to-use `shared-gdrive` import. Generate and host the
+wrapper and native file from the same Spyret release. Avoid overwriting a shared
+release in place: importers may cache it.
 
 ## Diagram operations
 

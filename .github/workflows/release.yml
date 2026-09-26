@@ -52,17 +52,40 @@ jobs:
       - run: npm ci
       - name: Pack and test the exact release artifact
         run: npm run test:package -- --out release
-      - name: Require Drive release configuration
+      - name: Copy native Pyret module into release assets
+        run: cp dist/spyret.pyret.js "release/spyret-$GITHUB_REF_NAME.js"
+      - name: Publish with npm trusted publishing
+        run: node scripts/publish.mjs
+      - name: Attach package and native module to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(release/*.tgz "release/spyret-$GITHUB_REF_NAME.js")
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            release_args=()
+            if [[ "$GITHUB_REF_NAME" == *-* ]]; then release_args+=(--prerelease); fi
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
+              --verify-tag --title "$GITHUB_REF_NAME" --generate-notes "${release_args[@]}"
+          fi
+      - name: Check optional Drive configuration
         env:
           GOOGLE_WIF_PROVIDER: ${{ vars.GOOGLE_WIF_PROVIDER }}
           GOOGLE_SERVICE_ACCOUNT: ${{ vars.GOOGLE_SERVICE_ACCOUNT }}
           SPYRET_DRIVE_FOLDER_ID: ${{ vars.SPYRET_DRIVE_FOLDER_ID }}
         run: |
-          test -n "$GOOGLE_WIF_PROVIDER"
-          test -n "$GOOGLE_SERVICE_ACCOUNT"
-          test -n "$SPYRET_DRIVE_FOLDER_ID"
+          configured=0
+          for value in "$GOOGLE_WIF_PROVIDER" "$GOOGLE_SERVICE_ACCOUNT" "$SPYRET_DRIVE_FOLDER_ID"; do
+            if [[ -n "$value" ]]; then ((configured+=1)); fi
+          done
+          if [[ "$configured" != 0 && "$configured" != 3 ]]; then
+            echo 'Set all three Drive variables, or leave all three unset for manual publication.' >&2
+            exit 1
+          fi
       - id: google-auth
         name: Authenticate to Google Drive
+        if: ${{ vars.GOOGLE_WIF_PROVIDER != '' && vars.GOOGLE_SERVICE_ACCOUNT != '' && vars.SPYRET_DRIVE_FOLDER_ID != '' }}
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.GOOGLE_WIF_PROVIDER }}
@@ -70,24 +93,22 @@ jobs:
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/drive
           create_credentials_file: false
-      - name: Publish with npm trusted publishing
-        run: node scripts/publish.mjs
       - name: Publish versioned Pyret imports to Google Drive
+        if: ${{ vars.GOOGLE_WIF_PROVIDER != '' && vars.GOOGLE_SERVICE_ACCOUNT != '' && vars.SPYRET_DRIVE_FOLDER_ID != '' }}
         env:
           GOOGLE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
           SPYRET_DRIVE_FOLDER_ID: ${{ vars.SPYRET_DRIVE_FOLDER_ID }}
         run: node scripts/publish-drive.mjs
-      - name: Attach package to GitHub release
+      - name: Attach Drive imports to GitHub release
+        if: ${{ vars.GOOGLE_WIF_PROVIDER != '' && vars.GOOGLE_SERVICE_ACCOUNT != '' && vars.SPYRET_DRIVE_FOLDER_ID != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          assets=(release/*.tgz "release/spyret-$GITHUB_REF_NAME.js" "release/spyret-$GITHUB_REF_NAME.arr" "release/spyret-$GITHUB_REF_NAME-drive.json")
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            release_args=()
-            if [[ "$GITHUB_REF_NAME" == *-* ]]; then release_args+=(--prerelease); fi
-            gh release create "$GITHUB_REF_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" \
-              --verify-tag --title "$GITHUB_REF_NAME" --generate-notes \
-              --notes "$(cat "release/spyret-$GITHUB_REF_NAME-import.md")" "${release_args[@]}"
+          gh release upload "$GITHUB_REF_NAME" \
+            "release/spyret-$GITHUB_REF_NAME.arr" "release/spyret-$GITHUB_REF_NAME-drive.json" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json body --jq .body > release/notes.md
+          if ! grep -Fq "## Import Spyret " release/notes.md; then
+            cat "release/spyret-$GITHUB_REF_NAME-import.md" >> release/notes.md
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --notes-file release/notes.md
           fi

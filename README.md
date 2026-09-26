@@ -68,7 +68,7 @@ The import form depends on the host and file:
 | Import | What it loads |
 | --- | --- |
 | `shared-gdrive("spyret-vVERSION.arr", "WRAPPER_DRIVE_FILE_ID")` | The versioned release wrapper in CPO: typed rules and diagram functions in one import. |
-| `url("https://…/spyret.arr")` | The generated Pyret wrapper: typed rules and diagram functions in one import. It imports the native module from Drive internally. |
+| `url("https://raw.githubusercontent.com/…/spyret-vVERSION.arr")` | A GitHub-hosted Pyret wrapper: typed rules and diagram functions in one import. It imports the native module from Drive internally. |
 | `gdrive-js("spyret-vVERSION.js", "NATIVE_DRIVE_FILE_ID")` | The versioned native JavaScript module in CPO, providing diagram functions. |
 | `js-file("path/to/spyret")` | The same native module in a browser host with a filesystem bridge. |
 
@@ -124,7 +124,8 @@ The standalone browser module loads Core 6.3.2; headless consumers do not need
 a Core runtime.
 `npm run test:package` verifies the actual tarball in an isolated consumer.
 Version tags trigger the unit/package suite and both upstream PBT seeds before
-publishing to npm and Google Drive. See [release setup and commands](docs/RELEASING.md).
+publishing to npm and GitHub. Drive publication is optional and can also be done
+manually with your own Google account. See [release setup and commands](docs/RELEASING.md).
 
 ## Migration and provenance
 
