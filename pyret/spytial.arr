@@ -2,414 +2,110 @@
 # Core 6.3.2; language 2026-09-18.
 provide *
 provide-types *
-import option as O
 import lists as L
 
 data TextSize:
-  | text-size-small
-  | text-size-normal
-  | text-size-large
+  | small
+  | normal
+  | large
 end
 
 data LinePattern:
-  | line-pattern-solid
-  | line-pattern-dashed
-  | line-pattern-dotted
+  | solid
+  | dashed
+  | dotted
 end
 
 data IconPlacement:
-  | icon-placement-full
-  | icon-placement-badge
+  | full
+  | badge
 end
 
 data Direction:
-  | direction-above
-  | direction-below
-  | direction-left
-  | direction-right
-  | direction-directly-above
-  | direction-directly-below
-  | direction-directly-left
-  | direction-directly-right
+  | above
+  | below
+  | left
+  | right
+  | directly-above
+  | directly-below
+  | directly-left
+  | directly-right
 end
 
 data Hold:
-  | hold-always
-  | hold-never
+  | always
+  | never
 end
 
 data Rotation:
-  | rotation-clockwise
-  | rotation-counterclockwise
+  | clockwise
+  | counterclockwise
 end
 
 data Alignment:
-  | alignment-horizontal
-  | alignment-vertical
+  | horizontal
+  | vertical
 end
 
 data GroupEdgeDirection:
-  | group-edge-direction-none
-  | group-edge-direction-togroup
-  | group-edge-direction-fromgroup
+  | no-group-edge
+  | togroup
+  | fromgroup
 end
 
 data LayoutFlag:
-  | layout-flag-hide-disconnected
-  | layout-flag-hide-disconnected-built-ins
+  | hide-disconnected
+  | hide-disconnected-built-ins
 end
 
 data TextStyle:
-  | text-style(size :: O.Option<TextSize>, color :: O.Option<String>) with:
-    method with-size(self, new-value :: TextSize) -> TextStyle:
-      text-style(O.some(new-value), self.color)
-    end,
-    method with-color(self, new-value :: String) -> TextStyle:
-      text-style(self.size, O.some(new-value))
-    end
+  | text-style(fields :: Any)
 end
-default-text-style = text-style(O.none, O.none)
 
 data LineStyle:
-  | line-style(color :: O.Option<String>, pattern :: O.Option<LinePattern>, weight :: O.Option<Number>, highlight :: O.Option<String>) with:
-    method with-color(self, new-value :: String) -> LineStyle:
-      line-style(O.some(new-value), self.pattern, self.weight, self.highlight)
-    end,
-    method with-pattern(self, new-value :: LinePattern) -> LineStyle:
-      line-style(self.color, O.some(new-value), self.weight, self.highlight)
-    end,
-    method with-weight(self, new-value :: Number) -> LineStyle:
-      line-style(self.color, self.pattern, O.some(new-value), self.highlight)
-    end,
-    method with-highlight(self, new-value :: String) -> LineStyle:
-      line-style(self.color, self.pattern, self.weight, O.some(new-value))
-    end
+  | line-style(fields :: Any)
 end
-default-line-style = line-style(O.none, O.none, O.none, O.none)
 
 data FillStyle:
-  | fill-style(color :: O.Option<String>) with:
-    method with-color(self, new-value :: String) -> FillStyle:
-      fill-style(O.some(new-value))
-    end
+  | fill-style(fields :: Any)
 end
-default-fill-style = fill-style(O.none)
 
 data BorderStyle:
-  | border-style(color :: O.Option<String>, width :: O.Option<Number>) with:
-    method with-color(self, new-value :: String) -> BorderStyle:
-      border-style(O.some(new-value), self.width)
-    end,
-    method with-width(self, new-value :: Number) -> BorderStyle:
-      border-style(self.color, O.some(new-value))
-    end
+  | border-style(fields :: Any)
 end
-default-border-style = border-style(O.none, O.none)
 
 data IconStyle:
-  | icon-style(path :: O.Option<String>, placement :: O.Option<IconPlacement>, opacity :: O.Option<Number>) with:
-    method with-path(self, new-value :: String) -> IconStyle:
-      icon-style(O.some(new-value), self.placement, self.opacity)
-    end,
-    method with-placement(self, new-value :: IconPlacement) -> IconStyle:
-      icon-style(self.path, O.some(new-value), self.opacity)
-    end,
-    method with-opacity(self, new-value :: Number) -> IconStyle:
-      icon-style(self.path, self.placement, O.some(new-value))
-    end
+  | icon-style(fields :: Any)
 end
-default-icon-style = icon-style(O.none, O.none, O.none)
 
 data RuleSource:
-  | rule-source(text :: String, location :: O.Option<String>) with:
-    method with-text(self, new-value :: String) -> RuleSource:
-      rule-source(new-value, self.location)
-    end,
-    method with-location(self, new-value :: String) -> RuleSource:
-      rule-source(self.text, O.some(new-value))
-    end
+  | rule-source(fields :: Any)
 end
 
 data GroupAddEdge:
-  | group-add-edge(points :: O.Option<GroupEdgeDirection>, line-style :: O.Option<LineStyle>, text-style :: O.Option<TextStyle>) with:
-    method with-points(self, new-value :: GroupEdgeDirection) -> GroupAddEdge:
-      group-add-edge(O.some(new-value), self.line-style, self.text-style)
-    end,
-    method with-line-style(self, new-value :: LineStyle) -> GroupAddEdge:
-      group-add-edge(self.points, O.some(new-value), self.text-style)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> GroupAddEdge:
-      group-add-edge(self.points, self.line-style, O.some(new-value))
-    end
+  | group-add-edge(fields :: Any)
 end
-default-group-add-edge = group-add-edge(O.none, O.none, O.none)
-
-data OrientationOptions:
-  | orientation-options(hold :: O.Option<Hold>, source :: O.Option<RuleSource>) with:
-    method with-hold(self, new-value :: Hold) -> OrientationOptions:
-      orientation-options(O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> OrientationOptions:
-      orientation-options(self.hold, O.some(new-value))
-    end
-end
-default-orientation-options = orientation-options(O.none, O.none)
-
-data CyclicOptions:
-  | cyclic-options(direction :: O.Option<Rotation>, hold :: O.Option<Hold>, source :: O.Option<RuleSource>) with:
-    method with-direction(self, new-value :: Rotation) -> CyclicOptions:
-      cyclic-options(O.some(new-value), self.hold, self.source)
-    end,
-    method with-hold(self, new-value :: Hold) -> CyclicOptions:
-      cyclic-options(self.direction, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> CyclicOptions:
-      cyclic-options(self.direction, self.hold, O.some(new-value))
-    end
-end
-default-cyclic-options = cyclic-options(O.none, O.none, O.none)
-
-data AlignOptions:
-  | align-options(hold :: O.Option<Hold>, source :: O.Option<RuleSource>) with:
-    method with-hold(self, new-value :: Hold) -> AlignOptions:
-      align-options(O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> AlignOptions:
-      align-options(self.hold, O.some(new-value))
-    end
-end
-default-align-options = align-options(O.none, O.none)
-
-data GroupOptions:
-  | group-options(add-edge :: O.Option<GroupAddEdge>, show-label :: O.Option<Boolean>, text-style :: O.Option<TextStyle>, hold :: O.Option<Hold>, source :: O.Option<RuleSource>) with:
-    method with-add-edge(self, new-value :: GroupAddEdge) -> GroupOptions:
-      group-options(O.some(new-value), self.show-label, self.text-style, self.hold, self.source)
-    end,
-    method with-show-label(self, new-value :: Boolean) -> GroupOptions:
-      group-options(self.add-edge, O.some(new-value), self.text-style, self.hold, self.source)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> GroupOptions:
-      group-options(self.add-edge, self.show-label, O.some(new-value), self.hold, self.source)
-    end,
-    method with-hold(self, new-value :: Hold) -> GroupOptions:
-      group-options(self.add-edge, self.show-label, self.text-style, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> GroupOptions:
-      group-options(self.add-edge, self.show-label, self.text-style, self.hold, O.some(new-value))
-    end
-end
-default-group-options = group-options(O.none, O.none, O.none, O.none, O.none)
-
-data SizeOptions:
-  | size-options(selector :: O.Option<String>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> SizeOptions:
-      size-options(O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> SizeOptions:
-      size-options(self.selector, O.some(new-value))
-    end
-end
-default-size-options = size-options(O.none, O.none)
-
-data HideAtomOptions:
-  | hide-atom-options(source :: O.Option<RuleSource>) with:
-    method with-source(self, new-value :: RuleSource) -> HideAtomOptions:
-      hide-atom-options(O.some(new-value))
-    end
-end
-default-hide-atom-options = hide-atom-options(O.none)
-
-data AtomStyleOptions:
-  | atom-style-options(selector :: O.Option<String>, fill-style :: O.Option<FillStyle>, border-style :: O.Option<BorderStyle>, icon-style :: O.Option<IconStyle>, text-style :: O.Option<TextStyle>, show-label :: O.Option<Boolean>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> AtomStyleOptions:
-      atom-style-options(O.some(new-value), self.fill-style, self.border-style, self.icon-style, self.text-style, self.show-label, self.source)
-    end,
-    method with-fill-style(self, new-value :: FillStyle) -> AtomStyleOptions:
-      atom-style-options(self.selector, O.some(new-value), self.border-style, self.icon-style, self.text-style, self.show-label, self.source)
-    end,
-    method with-border-style(self, new-value :: BorderStyle) -> AtomStyleOptions:
-      atom-style-options(self.selector, self.fill-style, O.some(new-value), self.icon-style, self.text-style, self.show-label, self.source)
-    end,
-    method with-icon-style(self, new-value :: IconStyle) -> AtomStyleOptions:
-      atom-style-options(self.selector, self.fill-style, self.border-style, O.some(new-value), self.text-style, self.show-label, self.source)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> AtomStyleOptions:
-      atom-style-options(self.selector, self.fill-style, self.border-style, self.icon-style, O.some(new-value), self.show-label, self.source)
-    end,
-    method with-show-label(self, new-value :: Boolean) -> AtomStyleOptions:
-      atom-style-options(self.selector, self.fill-style, self.border-style, self.icon-style, self.text-style, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> AtomStyleOptions:
-      atom-style-options(self.selector, self.fill-style, self.border-style, self.icon-style, self.text-style, self.show-label, O.some(new-value))
-    end
-end
-default-atom-style-options = atom-style-options(O.none, O.none, O.none, O.none, O.none, O.none, O.none)
-
-data EdgeStyleOptions:
-  | edge-style-options(selector :: O.Option<String>, filter :: O.Option<String>, line-style :: O.Option<LineStyle>, text-style :: O.Option<TextStyle>, show-label :: O.Option<Boolean>, hidden :: O.Option<Boolean>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> EdgeStyleOptions:
-      edge-style-options(O.some(new-value), self.filter, self.line-style, self.text-style, self.show-label, self.hidden, self.source)
-    end,
-    method with-filter(self, new-value :: String) -> EdgeStyleOptions:
-      edge-style-options(self.selector, O.some(new-value), self.line-style, self.text-style, self.show-label, self.hidden, self.source)
-    end,
-    method with-line-style(self, new-value :: LineStyle) -> EdgeStyleOptions:
-      edge-style-options(self.selector, self.filter, O.some(new-value), self.text-style, self.show-label, self.hidden, self.source)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> EdgeStyleOptions:
-      edge-style-options(self.selector, self.filter, self.line-style, O.some(new-value), self.show-label, self.hidden, self.source)
-    end,
-    method with-show-label(self, new-value :: Boolean) -> EdgeStyleOptions:
-      edge-style-options(self.selector, self.filter, self.line-style, self.text-style, O.some(new-value), self.hidden, self.source)
-    end,
-    method with-hidden(self, new-value :: Boolean) -> EdgeStyleOptions:
-      edge-style-options(self.selector, self.filter, self.line-style, self.text-style, self.show-label, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> EdgeStyleOptions:
-      edge-style-options(self.selector, self.filter, self.line-style, self.text-style, self.show-label, self.hidden, O.some(new-value))
-    end
-end
-default-edge-style-options = edge-style-options(O.none, O.none, O.none, O.none, O.none, O.none, O.none)
-
-data AttributeOptions:
-  | attribute-options(selector :: O.Option<String>, filter :: O.Option<String>, text-style :: O.Option<TextStyle>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> AttributeOptions:
-      attribute-options(O.some(new-value), self.filter, self.text-style, self.source)
-    end,
-    method with-filter(self, new-value :: String) -> AttributeOptions:
-      attribute-options(self.selector, O.some(new-value), self.text-style, self.source)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> AttributeOptions:
-      attribute-options(self.selector, self.filter, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> AttributeOptions:
-      attribute-options(self.selector, self.filter, self.text-style, O.some(new-value))
-    end
-end
-default-attribute-options = attribute-options(O.none, O.none, O.none, O.none)
-
-data TagOptions:
-  | tag-options(text-style :: O.Option<TextStyle>, source :: O.Option<RuleSource>) with:
-    method with-text-style(self, new-value :: TextStyle) -> TagOptions:
-      tag-options(O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> TagOptions:
-      tag-options(self.text-style, O.some(new-value))
-    end
-end
-default-tag-options = tag-options(O.none, O.none)
-
-data HideFieldOptions:
-  | hide-field-options(selector :: O.Option<String>, filter :: O.Option<String>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> HideFieldOptions:
-      hide-field-options(O.some(new-value), self.filter, self.source)
-    end,
-    method with-filter(self, new-value :: String) -> HideFieldOptions:
-      hide-field-options(self.selector, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> HideFieldOptions:
-      hide-field-options(self.selector, self.filter, O.some(new-value))
-    end
-end
-default-hide-field-options = hide-field-options(O.none, O.none, O.none)
-
-data InferredEdgeOptions:
-  | inferred-edge-options(draw :: O.Option<String>, line-style :: O.Option<LineStyle>, text-style :: O.Option<TextStyle>, color :: O.Option<String>, style :: O.Option<LinePattern>, weight :: O.Option<Number>, highlight :: O.Option<String>, source :: O.Option<RuleSource>) with:
-    method with-draw(self, new-value :: String) -> InferredEdgeOptions:
-      inferred-edge-options(O.some(new-value), self.line-style, self.text-style, self.color, self.style, self.weight, self.highlight, self.source)
-    end,
-    method with-line-style(self, new-value :: LineStyle) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, O.some(new-value), self.text-style, self.color, self.style, self.weight, self.highlight, self.source)
-    end,
-    method with-text-style(self, new-value :: TextStyle) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, O.some(new-value), self.color, self.style, self.weight, self.highlight, self.source)
-    end,
-    method with-color(self, new-value :: String) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, self.text-style, O.some(new-value), self.style, self.weight, self.highlight, self.source)
-    end,
-    method with-style(self, new-value :: LinePattern) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, self.text-style, self.color, O.some(new-value), self.weight, self.highlight, self.source)
-    end,
-    method with-weight(self, new-value :: Number) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, self.text-style, self.color, self.style, O.some(new-value), self.highlight, self.source)
-    end,
-    method with-highlight(self, new-value :: String) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, self.text-style, self.color, self.style, self.weight, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> InferredEdgeOptions:
-      inferred-edge-options(self.draw, self.line-style, self.text-style, self.color, self.style, self.weight, self.highlight, O.some(new-value))
-    end
-end
-default-inferred-edge-options = inferred-edge-options(O.none, O.none, O.none, O.none, O.none, O.none, O.none, O.none)
-
-data IconOptions:
-  | icon-options(show-labels :: O.Option<Boolean>, source :: O.Option<RuleSource>) with:
-    method with-show-labels(self, new-value :: Boolean) -> IconOptions:
-      icon-options(O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> IconOptions:
-      icon-options(self.show-labels, O.some(new-value))
-    end
-end
-default-icon-options = icon-options(O.none, O.none)
-
-data AtomColorOptions:
-  | atom-color-options(source :: O.Option<RuleSource>) with:
-    method with-source(self, new-value :: RuleSource) -> AtomColorOptions:
-      atom-color-options(O.some(new-value))
-    end
-end
-default-atom-color-options = atom-color-options(O.none)
-
-data EdgeColorOptions:
-  | edge-color-options(selector :: O.Option<String>, filter :: O.Option<String>, style :: O.Option<LinePattern>, weight :: O.Option<Number>, highlight :: O.Option<String>, show-label :: O.Option<Boolean>, hidden :: O.Option<Boolean>, source :: O.Option<RuleSource>) with:
-    method with-selector(self, new-value :: String) -> EdgeColorOptions:
-      edge-color-options(O.some(new-value), self.filter, self.style, self.weight, self.highlight, self.show-label, self.hidden, self.source)
-    end,
-    method with-filter(self, new-value :: String) -> EdgeColorOptions:
-      edge-color-options(self.selector, O.some(new-value), self.style, self.weight, self.highlight, self.show-label, self.hidden, self.source)
-    end,
-    method with-style(self, new-value :: LinePattern) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, O.some(new-value), self.weight, self.highlight, self.show-label, self.hidden, self.source)
-    end,
-    method with-weight(self, new-value :: Number) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, self.style, O.some(new-value), self.highlight, self.show-label, self.hidden, self.source)
-    end,
-    method with-highlight(self, new-value :: String) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, self.style, self.weight, O.some(new-value), self.show-label, self.hidden, self.source)
-    end,
-    method with-show-label(self, new-value :: Boolean) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, self.style, self.weight, self.highlight, O.some(new-value), self.hidden, self.source)
-    end,
-    method with-hidden(self, new-value :: Boolean) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, self.style, self.weight, self.highlight, self.show-label, O.some(new-value), self.source)
-    end,
-    method with-source(self, new-value :: RuleSource) -> EdgeColorOptions:
-      edge-color-options(self.selector, self.filter, self.style, self.weight, self.highlight, self.show-label, self.hidden, O.some(new-value))
-    end
-end
-default-edge-color-options = edge-color-options(O.none, O.none, O.none, O.none, O.none, O.none, O.none, O.none)
 
 data Constraint:
-  | spytial-orientation(selector :: String, directions :: L.List<Direction>, options :: OrientationOptions)
-  | spytial-cyclic(selector :: String, options :: CyclicOptions)
-  | spytial-align(selector :: String, direction :: Alignment, options :: AlignOptions)
-  | spytial-group(selector :: String, name :: String, options :: GroupOptions)
-  | spytial-size(width :: Number, height :: Number, options :: SizeOptions)
-  | spytial-hide-atom(selector :: String, options :: HideAtomOptions)
+  | spytial-orientation(selector :: String, directions :: L.List<Direction>, options :: Any)
+  | spytial-cyclic(selector :: String, options :: Any)
+  | spytial-align(selector :: String, direction :: Alignment, options :: Any)
+  | spytial-group(selector :: String, name :: String, options :: Any)
+  | spytial-size(width :: Number, height :: Number, options :: Any)
+  | spytial-hide-atom(selector :: String, options :: Any)
 end
 
 data Directive:
   | spytial-flag(name :: LayoutFlag)
-  | spytial-atom-style(options :: AtomStyleOptions)
-  | spytial-edge-style(field :: String, options :: EdgeStyleOptions)
-  | spytial-attribute(field :: String, options :: AttributeOptions)
-  | spytial-tag(to-tag :: String, name :: String, value :: String, options :: TagOptions)
-  | spytial-hide-field(field :: String, options :: HideFieldOptions)
-  | spytial-inferred-edge(name :: String, selector :: String, options :: InferredEdgeOptions)
-  | spytial-icon(selector :: String, path :: String, options :: IconOptions)
-  | spytial-atom-color(value :: String, selector :: String, options :: AtomColorOptions)
-  | spytial-edge-color(field :: String, value :: String, options :: EdgeColorOptions)
+  | spytial-atom-style(selector :: String, options :: Any)
+  | spytial-edge-style(field :: String, options :: Any)
+  | spytial-attribute(field :: String, options :: Any)
+  | spytial-tag(to-tag :: String, name :: String, value :: String, options :: Any)
+  | spytial-hide-field(field :: String, options :: Any)
+  | spytial-inferred-edge(name :: String, selector :: String, options :: Any)
+  | spytial-icon(selector :: String, path :: String, options :: Any)
+  | spytial-atom-color(value :: String, selector :: String, options :: Any)
+  | spytial-edge-color(field :: String, value :: String, options :: Any)
 end
 
 data SpytialRule:
@@ -418,44 +114,44 @@ data SpytialRule:
 end
 
 fun orientation(selector :: String, directions :: L.List<Direction>) -> SpytialRule:
-  constraint(spytial-orientation(selector, directions, default-orientation-options))
+  constraint(spytial-orientation(selector, directions, {}))
 end
-fun orientation-with(selector :: String, directions :: L.List<Direction>, options :: OrientationOptions) -> SpytialRule:
+fun orientation-with(selector :: String, directions :: L.List<Direction>, options :: Any) -> SpytialRule:
   constraint(spytial-orientation(selector, directions, options))
 end
 
 fun cyclic(selector :: String) -> SpytialRule:
-  constraint(spytial-cyclic(selector, default-cyclic-options))
+  constraint(spytial-cyclic(selector, {}))
 end
-fun cyclic-with(selector :: String, options :: CyclicOptions) -> SpytialRule:
+fun cyclic-with(selector :: String, options :: Any) -> SpytialRule:
   constraint(spytial-cyclic(selector, options))
 end
 
 fun align(selector :: String, direction :: Alignment) -> SpytialRule:
-  constraint(spytial-align(selector, direction, default-align-options))
+  constraint(spytial-align(selector, direction, {}))
 end
-fun align-with(selector :: String, direction :: Alignment, options :: AlignOptions) -> SpytialRule:
+fun align-with(selector :: String, direction :: Alignment, options :: Any) -> SpytialRule:
   constraint(spytial-align(selector, direction, options))
 end
 
 fun group(selector :: String, name :: String) -> SpytialRule:
-  constraint(spytial-group(selector, name, default-group-options))
+  constraint(spytial-group(selector, name, {}))
 end
-fun group-with(selector :: String, name :: String, options :: GroupOptions) -> SpytialRule:
+fun group-with(selector :: String, name :: String, options :: Any) -> SpytialRule:
   constraint(spytial-group(selector, name, options))
 end
 
 fun size(width :: Number, height :: Number) -> SpytialRule:
-  constraint(spytial-size(width, height, default-size-options))
+  constraint(spytial-size(width, height, {}))
 end
-fun size-with(width :: Number, height :: Number, options :: SizeOptions) -> SpytialRule:
+fun size-with(width :: Number, height :: Number, options :: Any) -> SpytialRule:
   constraint(spytial-size(width, height, options))
 end
 
 fun hide-atom(selector :: String) -> SpytialRule:
-  constraint(spytial-hide-atom(selector, default-hide-atom-options))
+  constraint(spytial-hide-atom(selector, {}))
 end
-fun hide-atom-with(selector :: String, options :: HideAtomOptions) -> SpytialRule:
+fun hide-atom-with(selector :: String, options :: Any) -> SpytialRule:
   constraint(spytial-hide-atom(selector, options))
 end
 
@@ -463,65 +159,59 @@ fun flag(name :: LayoutFlag) -> SpytialRule:
   directive(spytial-flag(name))
 end
 
-fun atom-style() -> SpytialRule:
-  directive(spytial-atom-style(default-atom-style-options))
-end
-fun atom-style-with(options :: AtomStyleOptions) -> SpytialRule:
-  directive(spytial-atom-style(options))
+fun atom-style(selector :: String, style :: Any) -> SpytialRule:
+  directive(spytial-atom-style(selector, style))
 end
 
-fun edge-style(field :: String) -> SpytialRule:
-  directive(spytial-edge-style(field, default-edge-style-options))
-end
-fun edge-style-with(field :: String, options :: EdgeStyleOptions) -> SpytialRule:
-  directive(spytial-edge-style(field, options))
+fun edge-style(field :: String, style :: Any) -> SpytialRule:
+  directive(spytial-edge-style(field, style))
 end
 
 fun attribute(field :: String) -> SpytialRule:
-  directive(spytial-attribute(field, default-attribute-options))
+  directive(spytial-attribute(field, {}))
 end
-fun attribute-with(field :: String, options :: AttributeOptions) -> SpytialRule:
+fun attribute-with(field :: String, options :: Any) -> SpytialRule:
   directive(spytial-attribute(field, options))
 end
 
 fun tag(to-tag :: String, name :: String, value :: String) -> SpytialRule:
-  directive(spytial-tag(to-tag, name, value, default-tag-options))
+  directive(spytial-tag(to-tag, name, value, {}))
 end
-fun tag-with(to-tag :: String, name :: String, value :: String, options :: TagOptions) -> SpytialRule:
+fun tag-with(to-tag :: String, name :: String, value :: String, options :: Any) -> SpytialRule:
   directive(spytial-tag(to-tag, name, value, options))
 end
 
 fun hide-field(field :: String) -> SpytialRule:
-  directive(spytial-hide-field(field, default-hide-field-options))
+  directive(spytial-hide-field(field, {}))
 end
-fun hide-field-with(field :: String, options :: HideFieldOptions) -> SpytialRule:
+fun hide-field-with(field :: String, options :: Any) -> SpytialRule:
   directive(spytial-hide-field(field, options))
 end
 
 fun inferred-edge(name :: String, selector :: String) -> SpytialRule:
-  directive(spytial-inferred-edge(name, selector, default-inferred-edge-options))
+  directive(spytial-inferred-edge(name, selector, {}))
 end
-fun inferred-edge-with(name :: String, selector :: String, options :: InferredEdgeOptions) -> SpytialRule:
+fun inferred-edge-with(name :: String, selector :: String, options :: Any) -> SpytialRule:
   directive(spytial-inferred-edge(name, selector, options))
 end
 
 fun icon(selector :: String, path :: String) -> SpytialRule:
-  directive(spytial-icon(selector, path, default-icon-options))
+  directive(spytial-icon(selector, path, {}))
 end
-fun icon-with(selector :: String, path :: String, options :: IconOptions) -> SpytialRule:
+fun icon-with(selector :: String, path :: String, options :: Any) -> SpytialRule:
   directive(spytial-icon(selector, path, options))
 end
 
 fun atom-color(value :: String, selector :: String) -> SpytialRule:
-  directive(spytial-atom-color(value, selector, default-atom-color-options))
+  directive(spytial-atom-color(value, selector, {}))
 end
-fun atom-color-with(value :: String, selector :: String, options :: AtomColorOptions) -> SpytialRule:
+fun atom-color-with(value :: String, selector :: String, options :: Any) -> SpytialRule:
   directive(spytial-atom-color(value, selector, options))
 end
 
 fun edge-color(field :: String, value :: String) -> SpytialRule:
-  directive(spytial-edge-color(field, value, default-edge-color-options))
+  directive(spytial-edge-color(field, value, {}))
 end
-fun edge-color-with(field :: String, value :: String, options :: EdgeColorOptions) -> SpytialRule:
+fun edge-color-with(field :: String, value :: String, options :: Any) -> SpytialRule:
   directive(spytial-edge-color(field, value, options))
 end

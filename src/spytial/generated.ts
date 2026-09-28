@@ -4,49 +4,49 @@ export const spytialSchema = {
   "coreVersion": "6.3.2",
   "enums": {
     "TextSize": {
-      "text-size-small": "small",
-      "text-size-normal": "normal",
-      "text-size-large": "large"
+      "small": "small",
+      "normal": "normal",
+      "large": "large"
     },
     "LinePattern": {
-      "line-pattern-solid": "solid",
-      "line-pattern-dashed": "dashed",
-      "line-pattern-dotted": "dotted"
+      "solid": "solid",
+      "dashed": "dashed",
+      "dotted": "dotted"
     },
     "IconPlacement": {
-      "icon-placement-full": "full",
-      "icon-placement-badge": "badge"
+      "full": "full",
+      "badge": "badge"
     },
     "Direction": {
-      "direction-above": "above",
-      "direction-below": "below",
-      "direction-left": "left",
-      "direction-right": "right",
-      "direction-directly-above": "directlyAbove",
-      "direction-directly-below": "directlyBelow",
-      "direction-directly-left": "directlyLeft",
-      "direction-directly-right": "directlyRight"
+      "above": "above",
+      "below": "below",
+      "left": "left",
+      "right": "right",
+      "directly-above": "directlyAbove",
+      "directly-below": "directlyBelow",
+      "directly-left": "directlyLeft",
+      "directly-right": "directlyRight"
     },
     "Hold": {
-      "hold-always": "always",
-      "hold-never": "never"
+      "always": "always",
+      "never": "never"
     },
     "Rotation": {
-      "rotation-clockwise": "clockwise",
-      "rotation-counterclockwise": "counterclockwise"
+      "clockwise": "clockwise",
+      "counterclockwise": "counterclockwise"
     },
     "Alignment": {
-      "alignment-horizontal": "horizontal",
-      "alignment-vertical": "vertical"
+      "horizontal": "horizontal",
+      "vertical": "vertical"
     },
     "GroupEdgeDirection": {
-      "group-edge-direction-none": "none",
-      "group-edge-direction-togroup": "togroup",
-      "group-edge-direction-fromgroup": "fromgroup"
+      "no-group-edge": "none",
+      "togroup": "togroup",
+      "fromgroup": "fromgroup"
     },
     "LayoutFlag": {
-      "layout-flag-hide-disconnected": "hideDisconnected",
-      "layout-flag-hide-disconnected-built-ins": "hideDisconnectedBuiltIns"
+      "hide-disconnected": "hideDisconnected",
+      "hide-disconnected-built-ins": "hideDisconnectedBuiltIns"
     }
   },
   "blocks": {
@@ -219,7 +219,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-orientation",
-      "optionsConstructor": "orientation-options",
       "fields": [
         {
           "name": "selector",
@@ -286,7 +285,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-cyclic",
-      "optionsConstructor": "cyclic-options",
       "fields": [
         {
           "name": "selector",
@@ -323,7 +321,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-align",
-      "optionsConstructor": "align-options",
       "fields": [
         {
           "name": "selector",
@@ -360,7 +357,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-group",
-      "optionsConstructor": "group-options",
       "fields": [
         {
           "name": "selector",
@@ -416,7 +412,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-size",
-      "optionsConstructor": "size-options",
       "fields": [
         {
           "name": "width",
@@ -453,7 +448,6 @@ export const spytialSchema = {
       "section": "constraints",
       "shape": "mapping",
       "constructor": "spytial-hide-atom",
-      "optionsConstructor": "hide-atom-options",
       "fields": [
         {
           "name": "selector",
@@ -476,7 +470,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "scalar",
       "constructor": "spytial-flag",
-      "optionsConstructor": "flag-options",
       "fields": [
         {
           "name": "flag",
@@ -493,7 +486,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-atom-style",
-      "optionsConstructor": "atom-style-options",
       "fields": [
         {
           "name": "selector",
@@ -550,7 +542,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-edge-style",
-      "optionsConstructor": "edge-style-options",
       "fields": [
         {
           "name": "field",
@@ -611,7 +602,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-attribute",
-      "optionsConstructor": "attribute-options",
       "fields": [
         {
           "name": "field",
@@ -653,7 +643,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-tag",
-      "optionsConstructor": "tag-options",
       "fields": [
         {
           "name": "toTag",
@@ -695,7 +684,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-hide-field",
-      "optionsConstructor": "hide-field-options",
       "fields": [
         {
           "name": "field",
@@ -730,7 +718,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-inferred-edge",
-      "optionsConstructor": "inferred-edge-options",
       "fields": [
         {
           "name": "name",
@@ -806,7 +793,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-icon",
-      "optionsConstructor": "icon-options",
       "fields": [
         {
           "name": "selector",
@@ -841,7 +827,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-atom-color",
-      "optionsConstructor": "atom-color-options",
       "fields": [
         {
           "name": "value",
@@ -870,7 +855,6 @@ export const spytialSchema = {
       "section": "directives",
       "shape": "mapping",
       "constructor": "spytial-edge-color",
-      "optionsConstructor": "edge-color-options",
       "fields": [
         {
           "name": "field",

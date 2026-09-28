@@ -33,7 +33,7 @@ type Field = {
   listRules?: { atMostOneOf?: readonly (readonly string[])[]; narrowsListTo?: Readonly<Record<string, readonly string[]>> };
 };
 type RecordSchema = { constructor: string; fields: readonly Field[] };
-type RuleSchema = RecordSchema & { name: string; yamlKey: string; section: string; shape: string; optionsConstructor: string };
+type RuleSchema = RecordSchema & { name: string; yamlKey: string; section: string; shape: string };
 type Json = string | number | boolean | Json[] | { [key: string]: Json };
 const rules: readonly RuleSchema[] = Object.values(spytialSchema.rules);
 const blocks: Readonly<Record<string, RecordSchema>> = spytialSchema.blocks;
@@ -110,20 +110,28 @@ function fieldValue(value: unknown, field: Field, runtime: SpytialRuntime, path:
 function readFields(dict: Record<string, unknown>, fields: readonly Field[], runtime: SpytialRuntime, path: string): Record<string, Json> {
   const result: Record<string, Json> = {};
   for (const f of fields) {
-    let value = dict[f.pyretName];
     const p = `${path}.${f.pyretName}`;
-    if (!f.required) {
-      if (runtime.ffi.isNone(value)) continue;
-      if (!runtime.ffi.isSome(value)) fail(p, 'expected Option');
-      value = (value as { dict: { value: unknown } }).dict.value;
+    if (!Object.prototype.hasOwnProperty.call(dict, f.pyretName)) {
+      if (f.required) fail(p, 'missing required field');
+      continue;
     }
-    result[f.name] = fieldValue(value, f, runtime, p);
+    result[f.name] = fieldValue(dict[f.pyretName], f, runtime, p);
   }
   return result;
 }
 
+/** A Pyret object literal supplies named, sparse fields without setter chains. */
+function namedFields(value: unknown, fields: readonly Field[], runtime: SpytialRuntime, path: string): Record<string, Json> {
+  if (!runtime.isObject(value) || runtime.isDataValue(value)) fail(path, 'expected a Pyret record');
+  const dict = (value as { dict: Record<string, unknown> }).dict;
+  const allowed = new Set(fields.map(f => f.pyretName));
+  for (const key of Object.keys(dict)) if (!allowed.has(key)) fail(`${path}.${key}`, 'unknown field');
+  return readFields(dict, fields, runtime, path);
+}
+
 function record(value: unknown, schema: RecordSchema, runtime: SpytialRuntime, path: string): Record<string, Json> {
-  return readFields(data(value, runtime, path, schema.constructor, schema.fields.map(f => f.pyretName)), schema.fields, runtime, path);
+  const dict = data(value, runtime, path, schema.constructor, ['fields']);
+  return namedFields(dict.fields, schema.fields, runtime, path);
 }
 
 // JSON scalars/inline arrays are YAML-compatible; quote all keys and strings.
@@ -157,10 +165,16 @@ export function spytialRulesToYaml(value: unknown, runtime: SpytialRuntime): str
     const required = schema.fields.filter(f => f.required);
     const optional = schema.fields.filter(f => !f.required);
     const dict = data(payload, runtime, path, schema.constructor,
-      [...required.map(f => f.pyretName), ...(optional.length ? ['options'] : [])]);
+      [...required.map(f => f.pyretName), ...(schema.name === 'atomStyle' ? ['selector'] : []),
+        ...(optional.length ? ['options'] : [])]);
     const fields = readFields(dict, required, runtime, path);
-    if (optional.length) Object.assign(fields, record(dict.options,
-      { constructor: schema.optionsConstructor, fields: optional }, runtime, `${path}.options`));
+    if (schema.name === 'atomStyle') {
+      const selector = optional.find(f => f.name === 'selector');
+      if (!selector) fail(path, 'missing atomStyle selector schema');
+      fields.selector = fieldValue(dict.selector, { ...selector, required: true }, runtime, `${path}.selector`);
+    }
+    if (optional.length) Object.assign(fields, namedFields(dict.options,
+      optional.filter(f => schema.name !== 'atomStyle' || f.name !== 'selector'), runtime, `${path}.options`));
     document[schema.section].push({ [schema.yamlKey]: schema.shape === 'scalar' ? fields[schema.fields[0].name] : fields });
   }
   return yaml(document).trimStart() + '\n';

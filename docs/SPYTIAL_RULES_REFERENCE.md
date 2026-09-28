@@ -3,9 +3,11 @@
 Core 6.3.2; language 2026-09-18.
 
 Import `pyret/spytial.arr` as `S`. Constructors return `S.SpytialRule` automatically.
-Optional fields use typed options. Start with `S.default-<rule>-options`,
-chain `.with-<field>(value)`, then pass it to `<rule>-with` after the required arguments.
-Style blocks similarly offer `default-<block>` and `.with-<field>(value)`.
+Enum values are qualified through `S`, for example `S.below` and `S.horizontal`.
+Optional fields use Pyret records with named keys. Pass the record to `<rule>-with`;
+`atom-style(selector, style)` and `edge-style(field, style)` take one directly.
+Nested style blocks are typed constructors such as `S.fill-style({color: "red"})`.
+Unset fields are omitted from YAML; Spytial Core supplies their defaults.
 
 Numeric bounds, patterns and incompatible direction combinations are checked during serialization.
 
@@ -18,8 +20,8 @@ Numeric bounds, patterns and incompatible direction combinations are checked dur
 | `size(width :: Number, height :: Number)` | `selector: String`, `source: RuleSource` |
 | `hide-atom(selector :: String)` | `source: RuleSource` |
 | `flag(name :: LayoutFlag)` |  |
-| `atom-style()` | `selector: String`, `fill-style: FillStyle`, `border-style: BorderStyle`, `icon-style: IconStyle`, `text-style: TextStyle`, `show-label: Boolean`, `source: RuleSource` |
-| `edge-style(field :: String)` | `selector: String`, `filter: String`, `line-style: LineStyle`, `text-style: TextStyle`, `show-label: Boolean`, `hidden: Boolean`, `source: RuleSource` |
+| `atom-style(selector :: String, style :: Any)` | A record with optional `fill-style`, `border-style`, `icon-style`, `text-style`, `show-label`, and `source` keys. |
+| `edge-style(field :: String, style :: Any)` | A record with optional `selector`, `filter`, `line-style`, `text-style`, `show-label`, `hidden`, and `source` keys. |
 | `attribute(field :: String)` | `selector: String`, `filter: String`, `text-style: TextStyle`, `source: RuleSource` |
 | `tag(to-tag :: String, name :: String, value :: String)` | `text-style: TextStyle`, `source: RuleSource` |
 | `hide-field(field :: String)` | `selector: String`, `filter: String`, `source: RuleSource` |
@@ -30,22 +32,22 @@ Numeric bounds, patterns and incompatible direction combinations are checked dur
 
 ## Enum values
 
-- `TextSize`: `text-size-small`, `text-size-normal`, `text-size-large`
-- `LinePattern`: `line-pattern-solid`, `line-pattern-dashed`, `line-pattern-dotted`
-- `IconPlacement`: `icon-placement-full`, `icon-placement-badge`
-- `Direction`: `direction-above`, `direction-below`, `direction-left`, `direction-right`, `direction-directly-above`, `direction-directly-below`, `direction-directly-left`, `direction-directly-right`
-- `Hold`: `hold-always`, `hold-never`
-- `Rotation`: `rotation-clockwise`, `rotation-counterclockwise`
-- `Alignment`: `alignment-horizontal`, `alignment-vertical`
-- `GroupEdgeDirection`: `group-edge-direction-none`, `group-edge-direction-togroup`, `group-edge-direction-fromgroup`
-- `LayoutFlag`: `layout-flag-hide-disconnected`, `layout-flag-hide-disconnected-built-ins`
+- `TextSize`: `small`, `normal`, `large`
+- `LinePattern`: `solid`, `dashed`, `dotted`
+- `IconPlacement`: `full`, `badge`
+- `Direction`: `above`, `below`, `left`, `right`, `directly-above`, `directly-below`, `directly-left`, `directly-right`
+- `Hold`: `always`, `never`
+- `Rotation`: `clockwise`, `counterclockwise`
+- `Alignment`: `horizontal`, `vertical`
+- `GroupEdgeDirection`: `no-group-edge`, `togroup`, `fromgroup`
+- `LayoutFlag`: `hide-disconnected`, `hide-disconnected-built-ins`
 
 ## Blocks
 
-- `text-style(size: Option<TextSize>, color: Option<String>)`
-- `line-style(color: Option<String>, pattern: Option<LinePattern>, weight: Option<Number>, highlight: Option<String>)`
-- `fill-style(color: Option<String>)`
-- `border-style(color: Option<String>, width: Option<Number>)`
-- `icon-style(path: Option<String>, placement: Option<IconPlacement>, opacity: Option<Number>)`
-- `rule-source(text: String, location: Option<String>)`
-- `group-add-edge(points: Option<GroupEdgeDirection>, line-style: Option<LineStyle>, text-style: Option<TextStyle>)`
+- `text-style({size: TextSize?, color: String?})`
+- `line-style({color: String?, pattern: LinePattern?, weight: Number?, highlight: String?})`
+- `fill-style({color: String?})`
+- `border-style({color: String?, width: Number?})`
+- `icon-style({path: String?, placement: IconPlacement?, opacity: Number?})`
+- `rule-source({text: String, location: String?})`
+- `group-add-edge({points: GroupEdgeDirection?, line-style: LineStyle?, text-style: TextStyle?})`

@@ -9,10 +9,8 @@ data Tree:
 sharing:
   method _spytial(self):
     [list:
-      S.orientation("left + right", [list: S.direction-below]),
-      S.atom-style-with(S.default-atom-style-options
-        .with-selector("leaf")
-        .with-fill-style(S.default-fill-style.with-color("lightblue")))
+      S.orientation("left + right", [list: S.below]),
+      S.atom-style("leaf", {fill-style: S.fill-style({color: "lightblue"})})
     ]
   end
 end

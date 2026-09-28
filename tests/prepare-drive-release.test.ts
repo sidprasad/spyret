@@ -9,7 +9,7 @@ import { driveFileId, importExample, prepareDriveRelease, prepareWrapper } from 
 const scratch: string[] = [];
 afterEach(() => { for (const dir of scratch.splice(0)) fs.rmSync(dir, { recursive: true, force: true }); });
 
-function fixture({ version = '1.2.3', browser = true, packageVersion = version } = {}) {
+function fixture({ version = '1.2.3', browser = true, packageVersion = version, shortEnums = true } = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'spyret-manual-test-'));
   scratch.push(dir);
   const pkg = path.join(dir, 'package');
@@ -18,7 +18,8 @@ function fixture({ version = '1.2.3', browser = true, packageVersion = version }
   fs.writeFileSync(path.join(pkg, 'package.json'), JSON.stringify({ name: 'spyret', version: packageVersion }));
   const native = '({ provides: { values: {} }, theModule: function() {} })\n';
   if (browser) fs.writeFileSync(path.join(pkg, 'dist/spyret.pyret.js'), native);
-  const rules = 'provide *\nprovide-types *\n# Rules from this exact release\n';
+  const rules = 'provide *\nprovide-types *\n# Rules from this exact release\n' +
+    (shortEnums ? 'data Direction:\n  | below\nend\n' : 'data Direction:\n  | direction-below\nend\n');
   if (browser) fs.writeFileSync(path.join(pkg, 'pyret/spytial.arr'), rules);
   const archive = path.join(dir, `spyret-${version}.tgz`);
   execFileSync('tar', ['-czf', archive, '-C', dir, 'package']);
@@ -51,7 +52,7 @@ it('downloads matching native and rules, then generates the wrapper and single C
   expect(wrapper).toContain('diagram = NativeSpyret.diagram');
   const example = importExample(release, 'https://drive.google.com/file/d/wrapper_456/view?usp=sharing');
   expect(example).toContain('import shared-gdrive("spyret-v1.2.3.arr", "wrapper_456") as S');
-  expect(example).toContain('S.orientation("left + right", [list: S.direction-below])');
+  expect(example).toContain('S.orientation("left + right", [list: S.below])');
   expect(example).toContain('S.diagram(branch(leaf(1), leaf(2)))');
   expect(prepareWrapper(release, 'native_123')).toBe(release.wrapperPath);
   expect(() => prepareWrapper(release, 'different_id')).toThrow('already has different contents');
@@ -65,6 +66,12 @@ it('supports selecting a specific prerelease', () => {
   const release = prepareDriveRelease({ ...setup, tag: 'v1.2.3-beta.1' });
   expect(setup.calls[0][2]).toBe('v1.2.3-beta.1');
   expect(path.basename(release.nativePath)).toBe('spyret-v1.2.3-beta.1.js');
+});
+
+it('prints the direction name from a previously published rule library', () => {
+  const setup = fixture({ version: '0.2.0', shortEnums: false });
+  const release = prepareDriveRelease(setup);
+  expect(importExample(release, 'wrapper_456')).toContain('S.orientation("left + right", [list: S.direction-below])');
 });
 
 it('rejects headless releases before preparing upload files', () => {
