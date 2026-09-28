@@ -11,8 +11,6 @@ import { generate } from '../scripts/generate-spytial.mjs';
 const manifest = JSON.parse(fs.readFileSync(new URL('../node_modules/spytial-core/docs/spytial-language.json', import.meta.url), 'utf8'));
 const datum = (name: string, fields: Record<string, unknown> = {}, identity = { $fieldNames: Object.keys(fields) }) =>
   ({ kind: 'data', $name: name, $arity: Object.keys(fields).length, $constructor: identity, dict: { ...fields } });
-const none = datum('none');
-const some = (value: unknown) => datum('some', { value });
 const list = (values: unknown[]): any => values.reduceRight((rest, first) => datum('link', { first, rest }), datum('empty'));
 const fn = (app: () => unknown) => ({ kind: 'function', app });
 const method = (app: (self: any) => unknown) => ({ kind: 'method', app });
@@ -48,15 +46,18 @@ function fieldValue(f: any, value: any): unknown {
   return value;
 }
 function record(name: string, fields: any[], values: Record<string, any>): unknown {
-  return datum(name, Object.fromEntries(fields.map(f => [f.pyretName,
-    f.required ? fieldValue(f, values[f.name]) : values[f.name] === undefined ? none : some(fieldValue(f, values[f.name]))])));
+  return datum(name, { fields: object(Object.fromEntries(fields.filter(f => values[f.name] !== undefined)
+    .map(f => [f.pyretName, fieldValue(f, values[f.name])]))) });
 }
 function rule(name: string, values: any): unknown {
   const schema = (spytialSchema.rules as any)[name];
   const required = schema.fields.filter((f: any) => f.required);
   const optional = schema.fields.filter((f: any) => !f.required);
   const fields = Object.fromEntries(required.map((f: any) => [f.pyretName, fieldValue(f, values[f.name])]));
-  if (optional.length) fields.options = record(schema.optionsConstructor, optional, values);
+  if (name === 'atomStyle') fields.selector = values.selector;
+  if (optional.length) fields.options = object(Object.fromEntries(optional
+    .filter((f: any) => (name !== 'atomStyle' || f.name !== 'selector') && values[f.name] !== undefined)
+    .map((f: any) => [f.pyretName, fieldValue(f, values[f.name])])));
   return datum(schema.section === 'constraints' ? 'constraint' : 'directive', { value: datum(schema.constructor, fields) });
 }
 
@@ -100,7 +101,7 @@ describe('generated Pyret rules', () => {
   it.each([
     ['size', { width: 0, height: 2 }, 'bounds'],
     ['size', { width: Infinity, height: 2 }, 'bounds'],
-    ['atomStyle', { iconStyle: { opacity: 2 } }, 'bounds'],
+    ['atomStyle', { selector: 'node', iconStyle: { opacity: 2 } }, 'bounds'],
     ['orientation', { selector: 'x', directions: ['above', 'below'] }, 'incompatible'],
     ['orientation', { selector: 'x', directions: ['directlyAbove', 'left'] }, 'incompatible'],
     ['align', { selector: '', direction: 'horizontal' }, 'empty'],
@@ -115,8 +116,8 @@ describe('generated Pyret rules', () => {
     const bad: any = rule('size', { width: 1, height: 2 });
     bad.$name = 'directive';
     expect(() => spytialRulesToYaml(list([bad]), runtime)).toThrow(/variant/);
-    bad.$name = 'constraint'; bad.dict.value.dict.options.dict.selector = 'bad';
-    expect(() => spytialRulesToYaml(list([bad]), runtime)).toThrow(/Option/);
+    bad.$name = 'constraint'; bad.dict.value.dict.options.dict.typo = 'bad';
+    expect(() => spytialRulesToYaml(list([bad]), runtime)).toThrow(/unknown field/);
     const cycle = list([rule('size', { width: 1, height: 2 })]); cycle.dict.rest = cycle;
     expect(() => spytialRulesToYaml(cycle, runtime)).toThrow(/cyclic/);
   });

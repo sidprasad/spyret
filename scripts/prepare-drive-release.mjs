@@ -98,6 +98,10 @@ export function prepareWrapper(release, nativeId) {
 
 export function importExample(release, driveLink) {
   const importLine = `import shared-gdrive(${JSON.stringify(path.basename(release.wrapperPath))}, ${JSON.stringify(driveFileId(driveLink))}) as S`;
+  const rules = fs.readFileSync(release.rulesPath, 'utf8');
+  const direction = /^\s*\| below\s*$/m.test(rules) ? 'below'
+    : /^\s*\| direction-below\s*$/m.test(rules) ? 'direction-below' : null;
+  if (!direction) throw new Error('The downloaded Pyret rules have no supported below direction.');
   return `${importLine}
 
 data Tree:
@@ -105,7 +109,7 @@ data Tree:
   | branch(left, right)
 sharing:
   method _spytial(self):
-    [list: S.orientation("left + right", [list: S.direction-below])]
+    [list: S.orientation("left + right", [list: S.${direction}])]
   end
 end
 

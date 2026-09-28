@@ -70,13 +70,20 @@ try {
   }
   assert.match(results.nested[0], /orientation/);
   assert.match(results.nested[0], /atomStyle/);
+  assert.match(results.nested[0], /edgeStyle/);
+  assert.match(results.nested[0], /dashed/);
   assert.match(results.nested[1], /0.5/);
   assert.deepEqual(results.raw, ['directives: []']);
+  assert.match(results['short-enum'][0], /right/);
+  assert.match(results['sparse-style'][0], /atomStyle/);
+  assert.match(results['sparse-style'][0], /"selector": "leaf"/);
+  assert.match(results['sparse-style'][0], /"showLabel": false/);
+  assert.doesNotMatch(results['sparse-style'][0], /fillStyle|borderStyle|iconStyle|textStyle/);
   assert.equal(results.paused.length, 1);
   assert.match(results.paused[0], /hideField/);
   assert.equal(results.empty.length, 1);
   assert.deepEqual(results['no-hooks'], []);
-  for (const name of ['invalid-return', 'invalid-size', 'throws', 'wrong-rule-type', 'wrong-wrapper']) {
+  for (const name of ['invalid-return', 'invalid-size', 'unknown-style-field', 'wrong-style-block', 'throws', 'wrong-rule-type', 'wrong-wrapper']) {
     assert.match(results[name], /_spytial/);
   }
   if (process.argv[3]) fs.writeFileSync(process.argv[3], JSON.stringify(results, null, 2) + '\n');

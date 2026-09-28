@@ -1,6 +1,6 @@
 {
   "name": "spyret",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Headless interfaces between standard Pyret and Spytial",
   "license": "MIT",
   "author": "Siddhartha Prasad",

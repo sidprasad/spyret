@@ -13,8 +13,8 @@ data Tree:
 sharing:
   method _spytial(self) -> List<S.SpytialRule>:
     [list:
-      S.orientation("children", [list: S.direction-below]),
-      S.align("siblings", S.alignment-horizontal)
+      S.orientation("children", [list: S.below]),
+      S.align("siblings", S.horizontal)
     ]
   end
 end
@@ -22,13 +22,11 @@ end
 
 Public constructors wrap their results as `constraint(Constraint)` or
 `directive(Directive)` automatically. Compose rules with ordinary Pyret lists;
-the serializer puts each rule in its proper YAML section. Optional fields and
-style blocks have typed, immutable setters:
+the serializer puts each rule in its proper YAML section. Use named fields in
+records for optional properties and typed constructors for nested style blocks:
 
 ```pyret
-S.atom-style-with(S.default-atom-style-options
-  .with-selector("leaf")
-  .with-fill-style(S.default-fill-style.with-color("red")))
+S.atom-style("leaf", {fill-style: S.fill-style({color: "red"})})
 ```
 
 From the JavaScript host, after evaluating the program:
@@ -60,8 +58,9 @@ rule list directly. Capture and `toDataInstance` never invoke hooks, and omit
 callable `_spytial` metadata on ordinary objects or outside a datatype's declared
 slots. Other capture restrictions still apply.
 
-See the [generated rule reference](SPYTIAL_RULES_REFERENCE.md) for every
-constructor, enum and option. Pyret annotations check field types; serialization
+See the [layout rule guide](SPYTIAL_LANGUAGE.md) for examples and the
+[generated rule reference](SPYTIAL_RULES_REFERENCE.md) for every constructor,
+enum and option. Pyret annotations check field types; serialization
 checks numeric bounds, string patterns and incompatible directions. Selector
 meaning and result arity remain Core's responsibility.
 
@@ -70,4 +69,3 @@ then run `npm run generate:spytial`. Commit the generated Pyret source, serializ
 schema and reference together. `npm run check:spytial` and the tests detect drift;
 unknown field types or enum vocabularies fail generation for explicit handling.
 No Core runtime dependency is added to the published package.
-
