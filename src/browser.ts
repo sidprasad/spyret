@@ -64,16 +64,38 @@ export function createDiagramView(prepared: ReturnType<typeof prepareDiagram>, l
   container.className = 'spyret-diagram';
   container.style.display = 'block';
   container.spytialCapture = prepared.snapshot;
-  const preview = document.createElement('pre');
-  preview.textContent = prepared.sourcePreview;
+  const style = document.createElement('style');
+  style.textContent = `
+    .spyret-diagram > .spyret-diagram-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      margin: 0.25em 0 0.6em;
+      padding: 0.35em 0.7em;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #334155;
+      font: 500 0.85em/1.4 system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .spyret-diagram > .spyret-diagram-toggle::before { content: '▾'; }
+    .spyret-diagram > .spyret-diagram-toggle[aria-expanded='false']::before { content: '▸'; }
+    .spyret-diagram > .spyret-diagram-toggle:hover { background: #e2e8f0; }
+    .spyret-diagram > .spyret-diagram-toggle:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+  `;
   const error = document.createElement('div');
   error.setAttribute('role', 'alert');
   const frame = document.createElement('div');
   const toggle = document.createElement('button');
   toggle.type = 'button';
+  toggle.className = 'spyret-diagram-toggle';
   toggle.textContent = 'Hide diagram';
   toggle.setAttribute('aria-expanded', 'true');
-  container.append(preview, error, toggle, frame);
+  container.append(style, error, toggle, frame);
   let generation = 0;
   toggle.onclick = () => {
     frame.hidden = !frame.hidden;
