@@ -65,9 +65,8 @@ native asset.
 
 Each display of a diagram creates its own DOM. The portable capture is available
 as `view.spytialCapture`. Core diagnostics remain on the layout passed to its
-component; failed graph rendering produces a visible message. The source preview
-is separate from capture, so inability to reconstruct source does not prevent
-rendering.
+component; failed graph rendering produces a visible message. The diagram view
+does not display reconstructed source text.
 
 ## Host and compatibility boundary
 

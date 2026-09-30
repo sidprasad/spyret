@@ -41,8 +41,9 @@ it('installs the CPO adapter once, preserves unrelated values, and renders fresh
 it('does not start a detached graph; reconnect creates a fresh graph and reports rendering failures', async () => {
   const frames: FrameRequestCallback[] = [];
   vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { frames.push(callback); return frames.length; });
-  const prepared = { sourcePreview: 'box(42)', snapshot: {} } as any;
+  const prepared = { snapshot: {} } as any;
   const view = createDiagramView(prepared, { nodes: [] }, document);
+  expect(view.querySelector('pre')).toBeNull();
   expect(frames).toHaveLength(0);
   document.body.append(view);
   const first = view.querySelector('webcola-cnd-graph')!;
