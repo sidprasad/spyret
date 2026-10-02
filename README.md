@@ -93,7 +93,7 @@ its migration is a [separate companion change](docs/IDE_MIGRATION.md).
 
 ## Development
 
-Requires Node 22 or later. The development dependency on released Core 6.3.2
+Requires Node 22 or later. The development dependency on released Core 6.5.1
 provides its public interface types and tests layout/query compatibility.
 Published Spyret builds include those type declarations and have no Core runtime
 dependency.
@@ -129,7 +129,7 @@ CommonJS and ES modules import `spyret`. The browser bundle is
 ## npm releases
 
 Published builds contain Spyret's adapter and bundled interface declarations.
-The standalone browser module loads Core 6.3.2; headless consumers do not need
+The standalone browser module loads Core 6.5.1; headless consumers do not need
 a Core runtime.
 `npm run test:package` verifies the actual tarball in an isolated consumer.
 Version tags trigger the unit/package suite and both upstream PBT seeds before

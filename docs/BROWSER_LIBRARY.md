@@ -37,7 +37,7 @@ import gdrive-js("spyret.js", "YOUR_DRIVE_FILE_ID") as Spyret
 Spyret.diagram([list: 1, 2, 3])
 ```
 
-The file bundles Spyret's browser implementation. It loads pinned Core 6.3.2
+The file bundles Spyret's browser implementation. It loads pinned Core 6.5.1
 from jsDelivr when first used, unless the page already supplies Core. No Spyret
 scripts, builtin registration, or Spytial-specific renderer need to be added to
 CPO. CPO's Drive access/authentication requirements still apply.

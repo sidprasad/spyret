@@ -1,6 +1,6 @@
 # Generated Pyret rule reference
 
-Core 6.3.2; language 2026-09-18.
+Core 6.5.1; language 2026-09-18.
 
 Import `pyret/spytial.arr` as `S`. Every rule takes one record and returns `S.SpytialRule`.
 Put required and optional fields in the same record; omit optional fields to use Core defaults.
