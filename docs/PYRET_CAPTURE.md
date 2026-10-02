@@ -5,6 +5,9 @@ runtime. It needs neither the Spyret compiler extension, a REPL evaluator, a
 display skeleton, nor a browser. The entry ships CommonJS, ESM, and an IIFE
 (`dist/spyret.global.js`, global `Spyret`).
 
+For the atoms and relations produced for each value kind, including lists,
+constructors, and tables, see [Pyret relationalization rules](PYRET_RELATIONALIZATION.md).
+
 ```js
 import {
   capturePyret, createPyretRuntimeAdapter, importPyretCapture,
