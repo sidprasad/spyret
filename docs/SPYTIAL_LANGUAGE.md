@@ -7,10 +7,11 @@ for Spytial constraints and directives. Each constructor returns an
 `_spytial` hooks on reachable values, collects their rules, and displays the
 diagram. See [layout hooks](SPYTIAL_HOOKS.md) for the hook contract and
 [the README](../README.md#pyret-import-describe-display) for the CPO import.
-This page describes the 0.3.0 source API. The published v0.2.0 wrapper uses
-prefixed enum names and `atom-style-with`; update those calls when moving to
-0.3.0. Style properties now use named records and typed blocks instead of
-`.with-*` chains.
+This page describes the upcoming 0.4.0 API. Every rule takes one record containing
+its required fields and any optional fields you need. Earlier wrappers use
+positional arguments, separate `-with` constructors, or `.with-*` chains;
+update those calls when moving to this API. Use a wrapper and native module
+from the same release.
 
 ## A first diagram
 
@@ -24,10 +25,10 @@ data Tree:
 sharing:
   method _spytial(self) -> List<S.SpytialRule>:
     [list:
-      S.orientation("left + right", [list: S.below]),
-      S.orientation("left", [list: S.left]),
-      S.orientation("right", [list: S.right]),
-      S.atom-style("leaf", {fill-style: S.fill-style({color: "#e0f2ff"})})
+      S.orientation({selector: "left + right", directions: [list: S.below]}),
+      S.orientation({selector: "left", directions: [list: S.left]}),
+      S.orientation({selector: "right", directions: [list: S.right]}),
+      S.atom-style({selector: "leaf", fill-style: S.fill-style({color: "#e0f2ff"})})
     ]
   end
 end
@@ -77,22 +78,22 @@ serializes the rule list.
 
 | Constructor | What it does |
 | --- | --- |
-| `S.orientation(selector, directions)` | Places targets of a binary selector relative to sources. |
-| `S.cyclic(selector)` | Arranges nodes in the order of a binary selector around a circle. |
-| `S.align(selector, direction)` | Gives selected nodes or node pairs a common row (`S.horizontal`) or column (`S.vertical`). |
-| `S.group(selector, name)` | Draws a box around selected nodes; a binary selector makes a group per first-column key. |
-| `S.size(width, height)` | Sets node dimensions in pixels; select the affected nodes with `S.size-with(width, height, {selector: "..."})`. Both numbers must be positive. |
-| `S.hide-atom(selector)` | Removes selected nodes and their edges from the diagram. |
+| `S.orientation({selector: ..., directions: ...})` | Places targets of a binary selector relative to sources. |
+| `S.cyclic({selector: ...})` | Arranges nodes in the order of a binary selector around a circle. |
+| `S.align({selector: ..., direction: ...})` | Gives selected nodes or node pairs a common row (`S.horizontal`) or column (`S.vertical`). |
+| `S.group({selector: ..., name: ...})` | Draws a box around selected nodes; a binary selector makes a group per first-column key. |
+| `S.size({width: ..., height: ...})` | Sets node dimensions in pixels; select the affected nodes with `S.size({width: ..., height: ..., selector: "..."})`. Both numbers must be positive. |
+| `S.hide-atom({selector: ...})` | Removes selected nodes and their edges from the diagram. |
 
 For example:
 
 ```pyret
 [list:
-  S.cyclic-with("next", {direction: S.counterclockwise}),
-  S.align("siblings", S.horizontal),
-  S.group("children", "Family"),
-  S.size-with(150, 80, {selector: "branch"}),
-  S.hide-atom("InternalNode")
+  S.cyclic({selector: "next", direction: S.counterclockwise}),
+  S.align({selector: "siblings", direction: S.horizontal}),
+  S.group({selector: "children", name: "Family"}),
+  S.size({width: 150, height: 80, selector: "branch"}),
+  S.hide-atom({selector: "InternalNode"})
 ]
 ```
 
@@ -105,13 +106,13 @@ not strictly above the source; it does not require the target to be below.
 
 | Constructor | What it does |
 | --- | --- |
-| `S.flag(name)` | Applies a global display flag such as `S.hide-disconnected` or `S.hide-disconnected-built-ins`. |
-| `S.atom-style(selector, style)` | Styles the selected nodes' fill, border, icon, label, and label visibility. |
-| `S.edge-style(field, style)` | Styles a relation's edge line and label, or hides the edge. |
-| `S.attribute(field)` | Shows a field as text inside its source node instead of as an edge. |
-| `S.tag(to-tag, name, value)` | Adds computed text to matching nodes while retaining the original edges. |
-| `S.hide-field(field)` | Hides a field's drawn edges. |
-| `S.inferred-edge(name, selector)` | Draws additional edges computed from a selector. |
+| `S.flag({name: ...})` | Applies a global display flag such as `S.hide-disconnected` or `S.hide-disconnected-built-ins`. |
+| `S.atom-style({selector: ..., ...})` | Styles the selected nodes' fill, border, icon, label, and label visibility. |
+| `S.edge-style({field: ..., ...})` | Styles a relation's edge line and label, or hides the edge. |
+| `S.attribute({field: ...})` | Shows a field as text inside its source node instead of as an edge. |
+| `S.tag({to-tag: ..., name: ..., value: ...})` | Adds computed text to matching nodes while retaining the original edges. |
+| `S.hide-field({field: ...})` | Hides a field's drawn edges. |
+| `S.inferred-edge({name: ..., selector: ...})` | Draws additional edges computed from a selector. |
 
 `field` names a relation; optional `selector` and `filter` fields narrow where
 field-based directives apply. `tag` takes a unary `to-tag` selector and a
@@ -119,16 +120,16 @@ field-based directives apply. `tag` takes a unary `to-tag` selector and a
 
 ```pyret
 [list:
-  S.flag(S.hide-disconnected-built-ins),
-  S.atom-style("leaf", {border-style: S.border-style({
+  S.flag({name: S.hide-disconnected-built-ins}),
+  S.atom-style({selector: "leaf", border-style: S.border-style({
     color: "#2563eb", width: 2
   })}),
-  S.edge-style("left", {line-style: S.line-style({
+  S.edge-style({field: "left", line-style: S.line-style({
     color: "#64748b", pattern: S.dashed
   })}),
-  S.attribute("value"),
-  S.hide-field("internal"),
-  S.inferred-edge("descendant", "^(left + right)")
+  S.attribute({field: "value"}),
+  S.hide-field({field: "internal"}),
+  S.inferred-edge({name: "descendant", selector: "^(left + right)"})
 ]
 ```
 
@@ -138,18 +139,42 @@ compatibility.
 
 ## Optional fields and reusable style blocks
 
-Rules with optional fields have a short constructor for their required
-arguments and a `-with` constructor that takes a Pyret record of named fields.
-`atom-style` takes a selector and a style record; `edge-style` takes a field
-and a style record. Within those records, nested styles use the named types
-`S.TextStyle`, `S.LineStyle`, `S.FillStyle`, `S.BorderStyle`, and `S.IconStyle`.
-For example, `S.text-style({color: "navy"})` makes a `TextStyle`. Leave any
-field out to let Spytial Core supply its display default.
+Every rule has one constructor taking one Pyret record. Add optional fields to
+that same record; leave them out to use Spytial Core's defaults. Pyret functions
+have a fixed number of arguments, so the record itself is required, while its
+optional fields can be omitted. There are no separate `-with` constructors.
+
+Nested styles use the named types `S.TextStyle`, `S.LineStyle`, `S.FillStyle`,
+`S.BorderStyle`, and `S.IconStyle`. For example,
+`S.text-style({color: "navy"})` makes a `TextStyle`. Line patterns are
+`S.solid`, `S.dashed`, or `S.dotted`; text sizes are `S.small`, `S.normal`, or
+`S.large`. These names come from the Spyret rule library imported as `S`.
+
+An inferred edge with default styling:
 
 ```pyret
-S.orientation-with("children", [list: S.below], {hold: S.always})
+S.inferred-edge({name: "value", selector: "(branch + leaf) <: (value.target)"})
+```
 
-S.group-with("children", "Family", {
+The same edge with a styled line and label:
+
+```pyret
+S.inferred-edge({
+  name: "value",
+  selector: "(branch + leaf) <: (value.target)",
+  line-style: S.line-style({color: "#2563eb", pattern: S.dashed, weight: 2}),
+  text-style: S.text-style({color: "#1e3a8a", size: S.small})
+})
+```
+
+Other rules use the same form:
+
+```pyret
+S.orientation({selector: "children", directions: [list: S.below], hold: S.always})
+
+S.group({
+  selector: "children",
+  name: "Family",
   add-edge: S.group-add-edge({
     points: S.togroup,
     line-style: S.line-style({weight: 2})
@@ -177,7 +202,7 @@ correct section automatically. `S.diagram(value)` collects the hooks reachable
 from `value`. To bypass hooks, call `S.diagram-with-rules(value, rules)`; an
 existing YAML document can be passed as `S.diagram(value, yaml)`.
 
-For example, `S.orientation("left", [list: S.below])` represents the
+For example, `S.orientation({selector: "left", directions: [list: S.below]})` represents the
 following constraint (the serializer quotes YAML keys and strings):
 
 ```yaml

@@ -13,8 +13,8 @@ data Tree:
 sharing:
   method _spytial(self) -> List<S.SpytialRule>:
     [list:
-      S.orientation("children", [list: S.below]),
-      S.align("siblings", S.horizontal)
+      S.orientation({selector: "children", directions: [list: S.below]}),
+      S.align({selector: "siblings", direction: S.horizontal})
     ]
   end
 end
@@ -22,11 +22,12 @@ end
 
 Public constructors wrap their results as `constraint(Constraint)` or
 `directive(Directive)` automatically. Compose rules with ordinary Pyret lists;
-the serializer puts each rule in its proper YAML section. Use named fields in
-records for optional properties and typed constructors for nested style blocks:
+the serializer puts each rule in its proper YAML section. Every rule takes one
+record containing its required fields and any optional properties. Use typed
+constructors for nested style blocks:
 
 ```pyret
-S.atom-style("leaf", {fill-style: S.fill-style({color: "red"})})
+S.atom-style({selector: "leaf", fill-style: S.fill-style({color: "red"})})
 ```
 
 From the JavaScript host, after evaluating the program:

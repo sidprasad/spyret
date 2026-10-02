@@ -102,6 +102,9 @@ export function importExample(release, driveLink) {
   const direction = /^\s*\| below\s*$/m.test(rules) ? 'below'
     : /^\s*\| direction-below\s*$/m.test(rules) ? 'direction-below' : null;
   if (!direction) throw new Error('The downloaded Pyret rules have no supported below direction.');
+  const orientation = /^fun orientation\(fields :: \{/m.test(rules)
+    ? `S.orientation({selector: "left + right", directions: [list: S.${direction}]})`
+    : `S.orientation("left + right", [list: S.${direction}])`;
   return `${importLine}
 
 data Tree:
@@ -109,7 +112,7 @@ data Tree:
   | branch(left, right)
 sharing:
   method _spytial(self):
-    [list: S.orientation("left + right", [list: S.${direction}])]
+    [list: ${orientation}]
   end
 end
 

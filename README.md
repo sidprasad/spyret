@@ -51,7 +51,7 @@ data Tree:
   | branch(left, right)
 sharing:
   method _spytial(self):
-    [list: S.orientation("left + right", [list: S.below])]
+    [list: S.orientation({selector: "left + right", directions: [list: S.below]})]
   end
 end
 
@@ -65,10 +65,13 @@ a diagram. Compose rules with ordinary Pyret lists; constructors such as
 use `S.diagram-with-rules(value, rules)`, or `S.diagram(value, yaml)` for YAML.
 See the [layout rule guide](docs/SPYTIAL_LANGUAGE.md) for examples and meaning,
 and the [rule reference](docs/SPYTIAL_RULES_REFERENCE.md) for every constructor.
-These examples use the 0.3.0 source API. The published v0.2.0 release wrapper
-uses names such as `S.direction-below`; `release:drive` prints an example
-matching the release it downloads. Version 0.3.0 also replaces fluent
-`.with-*` style options with named records and typed style blocks.
+These examples use the upcoming 0.4.0 API. Published 0.3.0 wrappers use
+positional rule arguments and separate `-with` constructors; 0.2.0 also uses
+prefixed enum names such as `S.direction-below`. `release:drive` prints an
+example matching the release it downloads. Every rule in 0.4.0 takes one record
+containing required and optional fields, with typed constructors for nested
+styles. Update existing calls and use the wrapper and native module from the
+same release.
 
 The import form depends on the host and file:
 

@@ -79,11 +79,20 @@ try {
   assert.match(results['sparse-style'][0], /"selector": "leaf"/);
   assert.match(results['sparse-style'][0], /"showLabel": false/);
   assert.doesNotMatch(results['sparse-style'][0], /fillStyle|borderStyle|iconStyle|textStyle/);
+  const plainEdge = parseLayoutSpec(results['inferred-default'][0]).directives.inferredEdges[0];
+  const styledEdge = parseLayoutSpec(results['inferred-styled'][0]).directives.inferredEdges[0];
+  assert.equal(plainEdge.name, 'value');
+  assert.equal(styledEdge.selector, '(branch + leaf) <: (value.target)');
+  assert.equal(styledEdge.color, '#2563eb');
+  assert.equal(styledEdge.style, 'dashed');
+  assert.equal(styledEdge.weight, 2);
+  assert.deepEqual(styledEdge.textStyle, { color: '#1e3a8a', size: 'small' });
+  assert.doesNotMatch(results['inferred-default'][0], /lineStyle|textStyle/);
   assert.equal(results.paused.length, 1);
   assert.match(results.paused[0], /hideField/);
   assert.equal(results.empty.length, 1);
   assert.deepEqual(results['no-hooks'], []);
-  for (const name of ['invalid-return', 'invalid-size', 'unknown-style-field', 'wrong-style-block', 'throws', 'wrong-rule-type', 'wrong-wrapper']) {
+  for (const name of ['invalid-return', 'invalid-size', 'unknown-style-field', 'wrong-style-block', 'throws', 'wrong-rule-type', 'wrong-wrapper', 'missing-required-field', 'unknown-rule-field']) {
     assert.match(results[name], /_spytial/);
   }
   if (process.argv[3]) fs.writeFileSync(process.argv[3], JSON.stringify(results, null, 2) + '\n');
