@@ -162,19 +162,10 @@ export function spytialRulesToYaml(value: unknown, runtime: SpytialRuntime): str
     const name = (payload as { $name?: string } | null)?.$name;
     const schema = rules.find(r => r.constructor === name);
     if (!schema || schema.section !== `${wrapper}s`) fail(path, `invalid ${wrapper} variant`);
-    const required = schema.fields.filter(f => f.required);
-    const optional = schema.fields.filter(f => !f.required);
-    const dict = data(payload, runtime, path, schema.constructor,
-      [...required.map(f => f.pyretName), ...(schema.name === 'atomStyle' ? ['selector'] : []),
-        ...(optional.length ? ['options'] : [])]);
-    const fields = readFields(dict, required, runtime, path);
-    if (schema.name === 'atomStyle') {
-      const selector = optional.find(f => f.name === 'selector');
-      if (!selector) fail(path, 'missing atomStyle selector schema');
-      fields.selector = fieldValue(dict.selector, { ...selector, required: true }, runtime, `${path}.selector`);
-    }
-    if (optional.length) Object.assign(fields, namedFields(dict.options,
-      optional.filter(f => schema.name !== 'atomStyle' || f.name !== 'selector'), runtime, `${path}.options`));
+    const dict = data(payload, runtime, path, schema.constructor, ['fields']);
+    const authoringFields = schema.fields.map(f =>
+      schema.name === 'atomStyle' && f.name === 'selector' ? { ...f, required: true } : f);
+    const fields = namedFields(dict.fields, authoringFields, runtime, path);
     document[schema.section].push({ [schema.yamlKey]: schema.shape === 'scalar' ? fields[schema.fields[0].name] : fields });
   }
   return yaml(document).trimStart() + '\n';

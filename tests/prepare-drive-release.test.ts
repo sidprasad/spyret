@@ -74,6 +74,13 @@ it('prints the direction name from a previously published rule library', () => {
   expect(importExample(release, 'wrapper_456')).toContain('S.orientation("left + right", [list: S.direction-below])');
 });
 
+it('prints the single-record form for the current rule library', () => {
+  const release = prepareDriveRelease(fixture());
+  fs.copyFileSync(new URL('../pyret/spytial.arr', import.meta.url), release.rulesPath);
+  const example = importExample(release, 'wrapper_456');
+  expect(example).toContain('S.orientation({selector: "left + right", directions: [list: S.below]})');
+});
+
 it('rejects headless releases before preparing upload files', () => {
   const setup = fixture({ version: '0.1.1', browser: false });
   expect(() => prepareDriveRelease(setup)).toThrow('does not contain the Pyret browser module');

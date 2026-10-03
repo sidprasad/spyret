@@ -1,6 +1,6 @@
 {
   "name": "spyret",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Headless interfaces between standard Pyret and Spytial",
   "license": "MIT",
   "author": "Siddhartha Prasad",
@@ -68,7 +68,7 @@
     "graphlib": "^2.1.8",
     "js-yaml": "4.1.0",
     "jsdom": "^26.1.0",
-    "spytial-core": "6.3.2",
+    "spytial-core": "6.5.1",
     "tsup": "^8.5.0",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3",

@@ -2,7 +2,7 @@ Spyret's adapter helpers and data contracts originate in Spytial-Core.
 Author: Siddhartha Prasad
 License: MIT (declared by the source package)
 Source: https://github.com/sidprasad/spytial-core
-Contracts verified against spytial-core 6.3.2.
+Contracts verified against spytial-core 6.5.1.
 No Core runtime or renderer is included.
 
 ---

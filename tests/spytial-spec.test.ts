@@ -51,14 +51,10 @@ function record(name: string, fields: any[], values: Record<string, any>): unkno
 }
 function rule(name: string, values: any): unknown {
   const schema = (spytialSchema.rules as any)[name];
-  const required = schema.fields.filter((f: any) => f.required);
-  const optional = schema.fields.filter((f: any) => !f.required);
-  const fields = Object.fromEntries(required.map((f: any) => [f.pyretName, fieldValue(f, values[f.name])]));
-  if (name === 'atomStyle') fields.selector = values.selector;
-  if (optional.length) fields.options = object(Object.fromEntries(optional
-    .filter((f: any) => (name !== 'atomStyle' || f.name !== 'selector') && values[f.name] !== undefined)
+  const fields = object(Object.fromEntries(schema.fields
+    .filter((f: any) => values[f.name] !== undefined)
     .map((f: any) => [f.pyretName, fieldValue(f, values[f.name])])));
-  return datum(schema.section === 'constraints' ? 'constraint' : 'directive', { value: datum(schema.constructor, fields) });
+  return datum(schema.section === 'constraints' ? 'constraint' : 'directive', { value: datum(schema.constructor, { fields }) });
 }
 
 describe('generated Pyret rules', () => {
@@ -66,7 +62,7 @@ describe('generated Pyret rules', () => {
     for (const [file, content] of Object.entries(generate(manifest))) {
       expect(fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8')).toBe(content);
     }
-    expect(spytialSchema.coreVersion).toBe('6.3.2');
+    expect(spytialSchema.coreVersion).toBe('6.5.1');
     expect(Object.keys(spytialSchema.rules)).toEqual(manifest.items.map((i: any) => i.id));
   });
 
@@ -99,6 +95,8 @@ describe('generated Pyret rules', () => {
   });
 
   it.each([
+    ['inferredEdge', { name: 'edge' }, 'missing required field'],
+    ['atomStyle', { showLabel: false }, 'missing required field'],
     ['size', { width: 0, height: 2 }, 'bounds'],
     ['size', { width: Infinity, height: 2 }, 'bounds'],
     ['atomStyle', { selector: 'node', iconStyle: { opacity: 2 } }, 'bounds'],
@@ -110,13 +108,13 @@ describe('generated Pyret rules', () => {
     expect(() => spytialRulesToYaml(list([rule(name as string, values)]), runtime)).toThrow(message as string);
   });
 
-  it('rejects malformed lists, wrappers, options and variants', () => {
+  it('rejects malformed lists, wrappers, records and variants', () => {
     expect(() => spytialRulesToYaml([], runtime)).toThrow(/Pyret List/);
     expect(() => spytialRulesToYaml(list([datum('constraint', { value: datum('unknown') })]), runtime)).toThrow(/variant/);
     const bad: any = rule('size', { width: 1, height: 2 });
     bad.$name = 'directive';
     expect(() => spytialRulesToYaml(list([bad]), runtime)).toThrow(/variant/);
-    bad.$name = 'constraint'; bad.dict.value.dict.options.dict.typo = 'bad';
+    bad.$name = 'constraint'; bad.dict.value.dict.fields.dict.typo = 'bad';
     expect(() => spytialRulesToYaml(list([bad]), runtime)).toThrow(/unknown field/);
     const cycle = list([rule('size', { width: 1, height: 2 })]); cycle.dict.rest = cycle;
     expect(() => spytialRulesToYaml(cycle, runtime)).toThrow(/cyclic/);

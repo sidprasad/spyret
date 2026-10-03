@@ -32,7 +32,7 @@ export function generate(manifest) {
     for (const key of Object.keys(f.listRules ?? {})) {
       if (!['atMostOneOf', 'narrowsListTo'].includes(key)) throw new Error(`Unhandled list rule: ${owner}.${f.name}.${key}`);
     }
-    // A parameter cannot shadow its enclosing function in Pyret: flag(name).
+    // Keep the public flag field named `name`, matching the existing Pyret API.
     const out = { name: f.name, pyretName: owner === 'flag' && f.name === 'flag' ? 'name' : kebab(f.name), type: f.type, required: !!f.required };
     for (const key of ['minimum', 'maximum', 'exclusiveMinimum', 'pattern', 'listRules']) {
       if (f[key] !== undefined) out[key] = f[key];
@@ -119,54 +119,32 @@ export function generate(manifest) {
   for (const [section, typeName] of [['constraints', 'Constraint'], ['directives', 'Directive']]) {
     lines.push(`data ${typeName}:`);
     for (const r of Object.values(rules).filter(r => r.section === section)) {
-      const args = r.fields.filter(f => f.required).map(f => `${f.pyretName} :: ${ann(f)}`);
-      if (r.name === 'atomStyle') args.push('selector :: String');
-      if (r.fields.some(f => !f.required)) args.push('options :: Any');
-      lines.push(`  | ${r.constructor}(${args.join(', ')})`);
+      lines.push(`  | ${r.constructor}(fields :: Any)`);
     }
     lines.push('end', '');
   }
   lines.push('data SpytialRule:', '  | constraint(value :: Constraint)', '  | directive(value :: Directive)', 'end', '');
   const reference = ['# Generated Pyret rule reference', '',
     `Core ${schema.coreVersion}; language ${schema.languageVersion}.`, '',
-    'Import `pyret/spytial.arr` as `S`. Constructors return `S.SpytialRule` automatically.',
-    'Enum values are qualified through `S`, for example `S.below` and `S.horizontal`.',
-    'Optional fields use Pyret records with named keys. Pass the record to `<rule>-with`;',
-    '`atom-style(selector, style)` and `edge-style(field, style)` take one directly.',
-    'Nested style blocks are typed constructors such as `S.fill-style({color: "red"})`.',
-    'Unset fields are omitted from YAML; Spytial Core supplies their defaults.', '',
+    'Import `pyret/spytial.arr` as `S`. Every rule takes one record and returns `S.SpytialRule`.',
+    'Put required and optional fields in the same record; omit optional fields to use Core defaults.',
+    'There are no separate `-with` constructors. Pyret checks required fields through record annotations.',
+    'Enum values are qualified through `S`, for example `S.below`, `S.dashed`, and `S.horizontal`.',
+    'Nested style blocks are typed constructors such as `S.line-style({color: "red"})`.', '',
     'Numeric bounds, patterns and incompatible direction combinations are checked during serialization.', '',
-    '| Constructor | Optional fields |', '| --- | --- |'];
+    '| Constructor | Required record fields | Optional record fields |', '| --- | --- | --- |'];
   for (const r of Object.values(rules)) {
-    const required = r.fields.filter(f => f.required);
-    const optional = r.fields.filter(f => !f.required);
-    const args = required.map(f => `${f.pyretName} :: ${ann(f)}`);
-    const values = required.map(f => f.pyretName);
+    // atom-style has always required an explicit selector in the Pyret API.
+    const required = r.fields.filter(f => f.required || (r.name === 'atomStyle' && f.name === 'selector'));
+    const optional = r.fields.filter(f => !required.includes(f));
+    const annotation = `{${required.map(f => `${f.pyretName} :: ${ann(f)}`).join(', ')}}`;
     const wrapper = r.section === 'constraints' ? 'constraint' : 'directive';
     const publicName = kebab(r.name);
-    if (r.name === 'atomStyle') {
-      if (r.fields[0]?.name !== 'selector' || r.fields[0].required || r.fields[0].type !== 'selector') {
-        throw new Error('Unsupported atomStyle shape');
-      }
-      lines.push('fun atom-style(selector :: String, style :: Any) -> SpytialRule:',
-        '  directive(spytial-atom-style(selector, style))', 'end', '');
-      reference.push('| `atom-style(selector :: String, style :: Any)` | A record with optional `fill-style`, `border-style`, `icon-style`, `text-style`, `show-label`, and `source` keys. |');
-      continue;
-    }
-    if (r.name === 'edgeStyle') {
-      if (r.fields.filter(f => f.required).map(f => f.name).join(',') !== 'field') throw new Error('Unsupported edgeStyle shape');
-      lines.push('fun edge-style(field :: String, style :: Any) -> SpytialRule:',
-        '  directive(spytial-edge-style(field, style))', 'end', '');
-      reference.push('| `edge-style(field :: String, style :: Any)` | A record with optional `selector`, `filter`, `line-style`, `text-style`, `show-label`, `hidden`, and `source` keys. |');
-      continue;
-    }
-    lines.push(`fun ${publicName}(${args.join(', ')}) -> SpytialRule:`,
-      `  ${wrapper}(${r.constructor}(${[...values, ...(optional.length ? ['{}'] : [])].join(', ')}))`, 'end');
-    if (optional.length) lines.push(`fun ${publicName}-with(${[...args, 'options :: Any'].join(', ')}) -> SpytialRule:`,
-      `  ${wrapper}(${r.constructor}(${[...values, 'options'].join(', ')}))`, 'end');
-    lines.push('');
+    lines.push(`fun ${publicName}(fields :: ${annotation}) -> SpytialRule:`,
+      `  ${wrapper}(${r.constructor}(fields))`, 'end', '');
     const deprecated = manifest.items.find(i => i.id === r.name).deprecated;
-    reference.push(`| \`${publicName}(${args.join(', ')})\`${deprecated ? ` (deprecated; use ${kebab(deprecated.replacedBy)})` : ''} | ${optional.map(f => `\`${f.pyretName}: ${ann(f)}\``).join(', ')} |`);
+    const fieldList = fields => fields.map(f => `\`${f.pyretName}: ${ann(f)}\``).join(', ');
+    reference.push(`| \`${publicName}({...})\`${deprecated ? ` (deprecated; use ${kebab(deprecated.replacedBy)})` : ''} | ${fieldList(required)} | ${fieldList(optional)} |`);
   }
   reference.push('', '## Enum values', '');
   for (const [name, variants] of Object.entries(enums)) reference.push(`- \`${name}\`: ${Object.keys(variants).map(v => `\`${v}\``).join(', ')}`);
